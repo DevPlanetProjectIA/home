@@ -26,7 +26,7 @@ section{padding:36px 0}h2{font-size:1.7rem;margin:0 0 18px}
 .steps .card{position:relative;padding-top:44px}.steps .card:before{counter-increment:s;content:counter(s);position:absolute;top:-4px;left:16px;width:36px;height:36px;border-radius:50%;background:var(--grad);color:#fff;font-weight:800;display:grid;place-items:center;transform:translateY(12px)}
 .buy{display:grid;gap:24px;grid-template-columns:auto 1fr;align-items:center;background:#fff;border-radius:22px;padding:26px;box-shadow:0 8px 30px #1a1f4a1a}
 #qr{width:240px;height:240px;border:1px solid #e3e6f0;border-radius:12px;overflow:hidden}#qr svg{width:100%;height:100%;display:block}
-.price{font-size:2rem;font-weight:800}
+.hide{display:none}.one{grid-template-columns:1fr}form.buy{display:grid;gap:12px}label{display:grid;gap:4px;font-weight:600;font-size:.95rem}input:not([type=checkbox]){font:inherit;padding:12px;border:1px solid #d5d9e8;border-radius:10px}.chk{display:flex;gap:10px;align-items:flex-start;font-weight:400}.chk input{margin-top:4px;width:18px;height:18px}.err{color:#c5221f;font-weight:600;margin:0;min-height:1.2em}.note{color:var(--mut);font-size:.92rem}.price{font-size:2rem;font-weight:800}
 textarea{width:100%;height:84px;font:12px monospace;padding:10px;border:1px solid #d5d9e8;border-radius:10px;resize:none;margin:8px 0}
 .btn{display:inline-block;border:0;cursor:pointer;text-decoration:none;font:700 1rem inherit;font-family:inherit;padding:14px 22px;border-radius:999px;color:#fff;background:var(--grad);margin:4px 6px 4px 0}
 .btn.wa{background:#1ebe57}.btn.alt{background:#fff;color:var(--ink);border:2px solid #d5d9e8}
@@ -63,16 +63,36 @@ footer{padding:28px 0 60px;color:var(--mut);font-size:.82rem}
 </div></section>
 
 <section id="comprar"><div class="wrap">
-  <h2>Compre agora via PIX</h2>
-  <div class="buy">
-    <div id="qr" aria-label="QR Code PIX"></div>
+  <h2>Garanta o seu</h2>
+  <div class="buy one" id="step1">
     <div>
       <div class="price" id="price"></div>
-      <div>Plano Google AI Pro — 18 meses</div>
-      <textarea id="code" readonly></textarea>
-      <button class="btn" id="copy">Copiar código PIX</button>
-      <a class="btn wa" id="paid" target="_blank" rel="noopener">Enviei o PIX — enviar comprovante</a>
+      <div>Plano Google AI Pro — 18 meses · 5 TB + 1000 créditos/mês</div>
+      <p class="note">Pagamento via PIX · Entrega digital pelo WhatsApp em até 2 horas após a confirmação da compra.</p>
+      <button class="btn" id="buy" type="button">Comprar agora</button>
       <a class="btn alt" id="ask" target="_blank" rel="noopener">Tirar dúvidas</a>
+    </div>
+  </div>
+
+  <form class="buy one hide" id="form" novalidate>
+    <h3>Seus dados</h3>
+    <label>Nome completo<input name="nome" id="f-nome" autocomplete="name" required></label>
+    <label>Telefone (WhatsApp) com DDD<input name="tel" id="f-tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="(21) 99999-9999" required></label>
+    <label>E-mail (será usado na ativação)<input name="email" id="f-email" type="email" autocomplete="email" required></label>
+    <label class="chk"><input type="checkbox" id="f-ok" required> <span>Li e concordo que a entrega do produto digital será feita pelo WhatsApp informado em <b>até 2 horas após a confirmação do pagamento</b>, e que sou um comprador de vendedor independente, sem vínculo com o Google.</span></label>
+    <p class="err" id="err" role="alert"></p>
+    <button class="btn" type="submit">Continuar para o pagamento</button>
+    <button class="btn alt" type="button" id="back">Voltar</button>
+  </form>
+
+  <div class="buy hide" id="step3">
+    <div id="qr" aria-label="QR Code PIX"></div>
+    <div>
+      <h3>Pague <span id="price2"></span> via PIX</h3>
+      <p class="note">Escaneie o QR Code ou use o PIX copia e cola. Depois de pagar, clique no botão verde para enviar o comprovante no WhatsApp.</p>
+      <textarea id="code" readonly></textarea>
+      <button class="btn" id="copy" type="button">Copiar código PIX</button>
+      <a class="btn wa" id="paid" target="_blank" rel="noopener">Já paguei — ir para o WhatsApp</a>
     </div>
   </div>
 </div></section>
@@ -87,7 +107,7 @@ footer{padding:28px 0 60px;color:var(--mut);font-size:.82rem}
 </div></section>
 
 <footer><div class="wrap">
-  Vendedor independente, sem vínculo, afiliação ou endosso do Google LLC. Google, Gemini, Google Drive, NotebookLM e Veo são marcas de seus respectivos titulares. Confirme os detalhes do plano com o vendedor pelo WhatsApp antes de pagar. Produto digital entregue pelo WhatsApp após a confirmação do pagamento.
+  Vendedor independente, sem vínculo, afiliação ou endosso do Google LLC. Google, Gemini, Google Drive, NotebookLM e Veo são marcas de seus respectivos titulares. Os dados informados na compra são usados apenas para a entrega e o atendimento, enviados ao vendedor pelo WhatsApp. Produto digital entregue pelo WhatsApp em até 2 horas após a confirmação do pagamento.
 </div></footer>
 <script src="config.js"></script><script src="qr.js"></script><script src="pix.js"></script><script src="app.js"></script>
 </body></html>
