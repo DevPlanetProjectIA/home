@@ -135,6 +135,17 @@ const limited = (ip) => {
 const clip = (v, n) => String(v ?? '').trim().slice(0, n);
 const todayISO = () => new Date().toISOString().slice(0, 10);
 
+// Total de vendas concluídas (pedidos da loja online marcados como "entregue" no Flow).
+app.get('/api/public/store/:slug/stats', (req, res) => {
+  const rows = db.prepare(`SELECT user_id, data FROM records WHERE kind='settings'`).all();
+  const hit = rows.find((r) => JSON.parse(r.data).storeSlug === req.params.slug);
+  if (!hit) return res.status(404).json({ error: 'Loja não encontrada' });
+  const sales = db.prepare(`SELECT data FROM records WHERE user_id=? AND kind='orders'`).all(hit.user_id)
+    .map((r) => JSON.parse(r.data)).filter((o) => o.origin === 'Loja online' && o.status === 'entregue').length;
+  res.set('Cache-Control', 'public, max-age=60');
+  res.json({ sales });
+});
+
 app.post('/api/public/store/:slug/checkout', (req, res) => {
   if (limited(req.ip)) return res.status(429).json({ error: 'Muitas tentativas. Tente mais tarde.' });
   const rows = db.prepare(`SELECT user_id, data FROM records WHERE kind='settings'`).all();

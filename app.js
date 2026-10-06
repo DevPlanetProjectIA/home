@@ -92,3 +92,14 @@ document.querySelectorAll(".faq details").forEach(d => d.addEventListener("toggl
 }));
 
 if (CONFIG.flowUrl) { const s = $("#seller"); s.href = CONFIG.flowUrl; s.hidden = false; }
+
+// Contador de vendas: valor informado em salesBefore + vendas entregues registradas no Flow (se configurado).
+(async () => {
+  let n = Number(CONFIG.salesBefore) || 0;
+  if (CONFIG.flowApi && CONFIG.storeSlug) {
+    try { const r = await fetch(`${CONFIG.flowApi.replace(/\/$/, "")}/api/public/store/${encodeURIComponent(CONFIG.storeSlug)}/stats`); if (r.ok) n += (await r.json()).sales || 0; } catch {}
+  }
+  if (n > 0) { $("#sales").textContent = `✔ ${n.toLocaleString("pt-BR")} vendas realizadas`; $("#sales").hidden = false; }
+})();
+// Contador de acessos (GoatCounter), só se configurado.
+if (CONFIG.goatcounter) { const s = document.createElement("script"); s.async = true; s.dataset.goatcounter = `https://${CONFIG.goatcounter}.goatcounter.com/count`; s.src = "https://gc.zgo.at/count.js"; document.head.append(s); }
