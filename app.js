@@ -13,6 +13,7 @@ $("#help").href = wa("Olá! Tenho uma dúvida sobre a loja.");
 
 $("#catalog").innerHTML = PRODUCTS.map(p => `
   <article class="prod">
+    <img class="pimg" src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy">
     <span class="tag">${esc(p.tag)}</span>
     <h3>${esc(p.name)}</h3>
     <p>${esc(p.short)}</p>
@@ -28,6 +29,7 @@ document.addEventListener("click", e => {
 
 function openProduct(id) {
   current = PRODUCTS.find(p => p.id === id);
+  $("#p-img").src = current.image; $("#p-img").alt = current.name;
   $("#p-name").textContent = current.name;
   $("#p-desc").textContent = current.description;
   $("#p-price").textContent = brl(current.price);

@@ -2,6 +2,7 @@
 const PRODUCTS = [
   {
     id: "google-ai-pro-18m",
+    image: "img/promo-google-ai-pro.svg",
     name: "Google AI Pro — 18 meses",
     tag: "Assinatura digital",
     price: 40,
@@ -18,6 +19,7 @@ const PRODUCTS = [
   },
   {
     id: "duolingo-super-12m",
+    image: "img/promo-duolingo-super.svg",
     name: "Duolingo Super — 12 meses",
     tag: "Assinatura digital",
     price: 40,
