@@ -1,8 +1,11 @@
 // ===== CONFIGURAÇÃO — edite aqui =====
 const CONFIG = {
-  pixKey: "05913955765",        // chave PIX (CPF)
+  storeName: "DevPlanet Store",
+  pixKey: "05913955765",           // chave PIX (CPF)
   pixName: "BRUNO LACERDA TOLEDO", // nome do recebedor (até 25 caracteres)
-  pixCity: "RIO DE JANEIRO",    // cidade do recebedor
-  price: 40,                    // preço em R$
+  pixCity: "RIO DE JANEIRO",
   whatsapp: "5521983110332",
+  // Integração com o Flow (sistema de gestão). Deixe flowApi vazio para desativar.
+  flowApi: "",                     // ex.: "https://flow.seudominio.com"
+  storeSlug: "",                   // mesmo "slug da loja" configurado em Configurações no Flow
 };
