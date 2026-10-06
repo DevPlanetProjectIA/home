@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(touch .nojekyll)",
+      "Bash(git add *)",
+      "Bash(git push *)"
+    ]
+  }
+}
