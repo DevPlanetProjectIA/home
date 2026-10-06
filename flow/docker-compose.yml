@@ -1,0 +1,15 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      # troque em produção; se vazio, um segredo aleatório é gerado e salvo em /data
+      JWT_SECRET: ""
+      # coloque 1 se servir via HTTPS
+      COOKIE_SECURE: "0"
+    volumes:
+      - flow_data:/data   # banco SQLite (app.db) persistido aqui
+    restart: unless-stopped
+volumes:
+  flow_data:

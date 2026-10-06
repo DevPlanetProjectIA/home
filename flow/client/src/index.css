@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 222 47% 3%; --foreground: 210 40% 92%;
+  --card: 222 47% 5%; --popover: 222 47% 6%;
+  --primary: 217 91% 60%; --primary-foreground: 222 47% 3%;
+  --secondary: 215 28% 15%; --secondary-foreground: 210 40% 90%;
+  --muted: 215 28% 12%; --muted-foreground: 215 16% 60%;
+  --accent: 199 89% 48%; --accent-foreground: 222 47% 3%;
+  --destructive: 0 84% 60%; --success: 142 71% 45%; --warning: 48 96% 53%;
+  --border: 215 28% 25%; --input: 215 28% 20%; --ring: 217 91% 60%;
+  --radius: .75rem; --sidebar-background: 222 47% 4%;
+}
+* { border-color: hsl(var(--border) / .6); }
+body { @apply bg-background text-foreground font-sans antialiased; margin: 0; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 8px; }
+
+@layer components {
+  .card { @apply rounded-xl border bg-card/80 p-5; }
+  .input { @apply w-full rounded-lg border border-input bg-muted/40 px-3 py-2 text-sm outline-none placeholder:text-muted-foreground/60 focus:border-primary focus:ring-1 focus:ring-primary; }
+  .label { @apply mb-1.5 block text-sm font-medium text-foreground/90; }
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition disabled:opacity-50; }
+  .btn-primary { @apply btn bg-primary text-white hover:bg-primary/90; }
+  .btn-ghost { @apply btn border border-border/60 bg-transparent hover:bg-secondary; }
+  .btn-danger { @apply btn bg-destructive/15 text-destructive hover:bg-destructive/25; }
+  .badge { @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium; }
+}
