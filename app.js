@@ -87,3 +87,5 @@ $("#copy").onclick = async () => {
 document.querySelectorAll(".faq details").forEach(d => d.addEventListener("toggle", () => {
   if (d.open) document.querySelectorAll(".faq details").forEach(o => o !== d && (o.open = false));
 }));
+
+if (CONFIG.flowUrl) { const s = $("#seller"); s.href = CONFIG.flowUrl; s.hidden = false; }

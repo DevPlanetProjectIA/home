@@ -1,0 +1,19 @@
+# Deploy do Flow no Render (https://render.com): New > Blueprint > selecione este repositório.
+services:
+  - type: web
+    name: flow
+    runtime: docker
+    dockerfilePath: ./flow/Dockerfile
+    dockerContext: ./flow
+    plan: starter
+    envVars:
+      - key: ALLOWED_ORIGIN
+        value: https://devplanetprojectia.github.io
+      - key: COOKIE_SECURE
+        value: "1"
+      - key: DATA_DIR
+        value: /data
+    disk:
+      name: flow-data
+      mountPath: /data
+      sizeGB: 1
