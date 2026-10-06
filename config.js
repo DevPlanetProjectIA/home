@@ -8,5 +8,7 @@ const CONFIG = {
   // Integração com o Flow (sistema de gestão). Deixe flowApi vazio para desativar.
   flowApi: "",                     // ex.: "https://flow.seudominio.com"
   flowUrl: "",                     // endereço público do Flow (mostra o link "Área do vendedor" no rodapé)
-  storeSlug: "",                   // mesmo "slug da loja" configurado em Configurações no Flow
+  storeSlug: "",
+  salesBefore: 30,                 // vendas feitas antes do Flow estar registrando (some às vendas "entregues" no Flow)
+  goatcounter: "",                 // código do GoatCounter (contador de acessos), ex.: "minhaloja" -> minhaloja.goatcounter.com                   // mesmo "slug da loja" configurado em Configurações no Flow
 };
