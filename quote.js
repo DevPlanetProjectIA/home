@@ -24,7 +24,7 @@ function addItem(it = {}) {
   d.innerHTML = `<input data-k="name" placeholder="Item" value="${esc(it.name || "")}"><input data-k="qty" type="number" min="1" value="${it.qty || 1}">
   <input data-k="price" inputmode="decimal" placeholder="Preço unit." value="${esc(it.price || "")}"><input data-k="disc" inputmode="decimal" placeholder="Desc. %">
   <button class="lnk" type="button" aria-label="Remover">✕</button><input class="d" data-k="desc" placeholder="Descrição (opcional)">
-  <div class="d imgrow"><img alt="" hidden><label class="btn alt sm">Imagem do produto<input type="file" accept="image/*" hidden></label><button class="lnk" type="button" hidden>Remover imagem</button></div>`;
+  <div class="d imgrow"><img alt="" hidden><label class="btn alt">📷 Imagem do produto<input type="file" accept="image/*" hidden></label><button class="lnk" type="button" hidden>Remover imagem</button></div>`;
   const img = d.querySelector(".imgrow img"), rm = d.querySelector(".imgrow .lnk"), file = d.querySelector("input[type=file]");
   const setImg = u => { d._img = u || ""; img.src = u || ""; img.hidden = rm.hidden = !u; };
   file.onchange = () => { const f = file.files[0]; if (f) shrink(f).then(setImg).catch(() => alert("Não foi possível ler a imagem.")); file.value = ""; };
