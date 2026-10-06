@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gerador de orçamento</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="tools.css"></head>
+<body class="q">
+<header class="top"><div class="wrap bar"><a class="brand" href="./"><span class="dot"></span><span data-store></span></a>
+<nav><a href="./">Loja</a><a href="calculadora.html">Calculadora</a><a href="orcamento.html">Orçamento</a></nav></div></header>
+<main class="wrap tool">
+<h1>Gerador de orçamento</h1><p class="lead muted">Monte o orçamento, gere o PDF e envie pelo WhatsApp.</p>
+<div class="panel"><h3>Vendedor</h3><div class="g2">
+ <label>Empresa / vendedor<input id="seller"></label><label>Telefone do vendedor<input id="sellerPhone" type="tel"></label>
+ <label>Nº do orçamento<input id="number" placeholder="ORC-001"></label><label>Validade (dias)<input id="validity" type="number" value="7"></label></div></div>
+<div class="panel"><h3>Cliente</h3><div class="g2">
+ <label>Nome<input id="client"></label><label>WhatsApp (com DDD)<input id="phone" type="tel" placeholder="(21) 99999-9999"></label>
+ <label>E-mail<input id="email" type="email"></label><label>CPF / CNPJ<input id="doc"></label>
+ <label class="full">Prazo de entrega<select id="delivery"><option>Sem prazo</option><option>3 dias</option><option>5 dias</option><option>7 dias</option><option>10 dias</option><option>15 dias</option><option>30 dias</option></select></label></div></div>
+<div class="panel"><h3>Itens <button class="btn sm" id="addItem" type="button">+ Adicionar item</button></h3><div class="items" id="items"></div></div>
+<div class="panel"><div class="g2">
+ <label>Desconto<div style="display:flex;gap:8px"><select id="discType"><option value="%">%</option><option value="$">R$</option></select><input id="discount" inputmode="decimal" placeholder="0" style="flex:1"></div></label>
+ <label>Frete (R$)<input id="shipping" inputmode="decimal" placeholder="0,00"></label>
+ <label class="full">Observações<textarea class="in" id="notes" rows="3" style="padding:10px;border:1px solid var(--line);border-radius:10px"></textarea></label></div>
+ <div class="tot" id="tot" style="margin-top:14px"></div>
+ <div class="actions"><button class="btn" id="pdf" type="button">Gerar PDF</button><button class="btn wa" id="wpp" type="button">Enviar por WhatsApp</button></div></div>
+</main>
+<div id="doc"></div>
+<script src="config.js"></script><script src="quote.js"></script>
+</body></html>
