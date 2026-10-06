@@ -4,6 +4,7 @@ const wa = t => `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(t)}`
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 let current = null, order = null;
 
+$("#hero-price").textContent = brl(PRODUCTS[0].price);
 document.title = `${CONFIG.storeName} — Assinaturas e produtos digitais`;
 document.querySelectorAll("[data-store]").forEach(e => e.textContent = CONFIG.storeName);
 $("#help").href = wa("Olá! Tenho uma dúvida sobre a loja.");
@@ -13,7 +14,7 @@ $("#catalog").innerHTML = PRODUCTS.map(p => `
     <span class="tag">${esc(p.tag)}</span>
     <h3>${esc(p.name)}</h3>
     <p>${esc(p.short)}</p>
-    <div class="row"><b class="pr">${brl(p.price)}</b>
+    <div class="row"><div><b class="pr">${brl(p.price)}</b><span class="once-s">pagamento único · sem mensalidade</span></div>
     <button class="btn" data-open="${esc(p.id)}">Ver produto</button></div>
   </article>`).join("") + `<article class="prod soon"><span class="tag">Em breve</span><h3>Novos produtos</h3><p>Estamos preparando novas assinaturas e produtos digitais.</p></article>`;
 
@@ -36,7 +37,7 @@ function openProduct(id) {
 $("#p-buy").onclick = () => {
   dlg.prod.close();
   $("#s-form").hidden = false; $("#s-pix").hidden = true; $("#err").textContent = "";
-  $("#b-summary").textContent = `${current.name} · ${brl(current.price)}`;
+  $("#b-summary").textContent = `${current.name} · ${brl(current.price)} (pagamento único, sem mensalidade)`;
   dlg.buy.showModal();
 };
 

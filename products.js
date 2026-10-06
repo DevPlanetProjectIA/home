@@ -5,7 +5,7 @@ const PRODUCTS = [
     name: "Google AI Pro — 18 meses",
     tag: "Assinatura digital",
     price: 40,
-    short: "18 meses com 5 TB de armazenamento e 1000 créditos de IA por mês.",
+    short: "18 meses com 5 TB de armazenamento e 1000 créditos de IA por mês. Pague uma vez, sem mensalidade.",
     description: "Plano de 18 meses com acesso ao Gemini avançado, 5 TB no Google Drive e 1000 créditos por mês para os recursos de IA compatíveis.",
     features: [
       ["Gemini avançado", "Respostas mais inteligentes, criação de textos e produtividade."],
