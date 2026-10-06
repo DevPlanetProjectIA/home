@@ -3,7 +3,8 @@
     "allow": [
       "Bash(touch .nojekyll)",
       "Bash(git add *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(sed -i 's/SEU NOME COMPLETO/BRUNO LACERDA TOLEDO/; s/price: 0, .*/price: 40,                    \\\\/\\\\/ preço em R$/' config.js)"
     ]
   }
 }
