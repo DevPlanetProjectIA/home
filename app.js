@@ -61,7 +61,7 @@ $("#form").onsubmit = async e => {
   $("#paid").href = wa(
     `Olá! Acabei de pagar via PIX.\n\nProduto: ${current.name} (${brl(current.price)})\nPedido: ${ref}\n` +
     `Nome: ${name}\nTelefone: ${phone}\nE-mail: ${email}\n` +
-    `Concordo com a entrega em até 2 horas após a confirmação do pagamento.\n\nSegue o comprovante:`);
+    `Concordo com a entrega em até 24 horas após a confirmação do pagamento.\n\nSegue o comprovante:`);
   $("#s-form").hidden = true; $("#s-pix").hidden = false;
 };
 

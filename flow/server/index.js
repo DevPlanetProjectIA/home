@@ -157,7 +157,7 @@ app.post('/api/public/store/:slug/checkout', (req, res) => {
   ins('orders', {
     client: name, clientId: String(clientId), ddi: '+55', phone, email, total, cost: 0, payment: 'pendente', paid: 0,
     origin: 'Loja online', owner: '', start: due, due, title: product,
-    notes: `Ref ${ref} · Comprador aceitou entrega digital em até 2h após a confirmação do pagamento. Confirmar o PIX antes de entregar.`,
+    notes: `Ref ${ref} · Comprador aceitou entrega digital em até 24h após a confirmação do pagamento. Confirmar o PIX antes de entregar.`,
     photo: '', status: 'aguardando',
   });
   res.json({ ok: true });
