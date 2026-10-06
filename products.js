@@ -16,4 +16,18 @@ const PRODUCTS = [
     ],
     audience: ["Criadores de conteúdo", "Estudantes", "Profissionais", "Designers"],
   },
+  {
+    id: "duolingo-super-12m",
+    name: "Duolingo Super — 12 meses",
+    tag: "Assinatura digital",
+    price: 40,
+    short: "12 meses de Duolingo Super. Pague uma vez, sem mensalidade.",
+    description: "Plano de 12 meses de Duolingo Super para estudar idiomas. As instruções de ativação são enviadas pelo WhatsApp após a confirmação do pagamento.",
+    features: [
+      ["Duolingo Super por 12 meses", "Acesso ao plano Super durante todo o período contratado."],
+      ["Pagamento único", "R$ 40,00 via PIX, sem mensalidade cobrada por nós."],
+      ["Entrega pelo WhatsApp", "Instruções de ativação em até 24 horas após a confirmação do pagamento."],
+    ],
+    audience: ["Estudantes", "Profissionais"],
+  },
 ];
