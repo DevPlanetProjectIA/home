@@ -2,6 +2,8 @@ const $ = (s, r = document) => r.querySelector(s);
 const brl = v => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const wa = t => `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(t)}`;
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const AUD_ICON = { "Criadores de conteúdo": "users", "Estudantes": "cap", "Profissionais": "case", "Designers": "pencil" };
+const FEAT_ICON = { "1000 créditos por mês": "coin" };
 let current = null, order = null;
 
 $("#hero-price").textContent = brl(PRODUCTS[0].price);
@@ -29,8 +31,8 @@ function openProduct(id) {
   $("#p-name").textContent = current.name;
   $("#p-desc").textContent = current.description;
   $("#p-price").textContent = brl(current.price);
-  $("#p-feat").innerHTML = current.features.map(([t, d]) => `<li><b>${esc(t)}</b><span>${esc(d)}</span></li>`).join("");
-  $("#p-aud").innerHTML = current.audience.map(a => `<span>${esc(a)}</span>`).join("");
+  $("#p-feat").innerHTML = current.features.map(([t, d]) => `<li>${FEAT_ICON[t] ? `<img src="img/${FEAT_ICON[t]}.png" alt="">` : ""}<b>${esc(t)}</b><span>${esc(d)}</span></li>`).join("");
+  $("#p-aud").innerHTML = current.audience.map(a => `<span>${AUD_ICON[a] ? `<img src="img/${AUD_ICON[a]}.png" alt="">` : ""}${esc(a)}</span>`).join("");
   dlg.prod.showModal();
 }
 
