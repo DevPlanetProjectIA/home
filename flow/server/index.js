@@ -10,6 +10,7 @@ import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { fulfillOrderLicense } from './licenseService.js';
 import { startTelegramPolling, notifyAdminNewOrder } from './telegramService.js';
+import { startWhatsAppService, getWhatsAppStatus, sendAutoWhatsAppMessage } from './whatsappService.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
@@ -459,8 +460,8 @@ eco.post('/orders/:id/simulate-payment', async (req, res) => {
   res.json({ success: true, message: 'Pagamento aprovado e alerta enviado ao Telegram do administrador!' });
 });
 
-// 6. Entregar Licença Manualmente (Web ou API)
-eco.post('/orders/:id/deliver', (req, res) => {
+// 6. Entregar Licença (Web, API ou Painel)
+eco.post('/orders/:id/deliver', async (req, res) => {
   const { id } = req.params;
   const { licenseKey } = req.body || {};
   if (!licenseKey) return res.status(400).json({ error: 'Informe a chave da licença.' });
@@ -470,7 +471,23 @@ eco.post('/orders/:id/deliver', (req, res) => {
 
   const prodInfo = PRODUCT_INSTRUCTIONS[order.product_id] || { guide: 'Siga as instruções com sua chave para ativar.' };
   db.prepare("UPDATE ecommerce_orders SET status='delivered', license_key=?, license_instructions=?, updated_at=CURRENT_TIMESTAMP WHERE id=?").run(licenseKey.trim(), prodInfo.guide, order.id);
-  res.json({ success: true, status: 'delivered' });
+
+  // Disparo automático pelo WhatsApp
+  const waText = 
+    `Olá, ${order.customer_name}! 🚀\n` +
+    `Aqui está a sua licença adquirida na DevPlanet Store:\n\n` +
+    `📦 *Produto:* ${order.product_name}\n` +
+    `🔑 *Chave de Ativação:*\n${licenseKey.trim()}\n\n` +
+    `📖 *Instruções de Ativação:*\n${prodInfo.guide}\n\n` +
+    `Qualquer dúvida ou suporte, estou à disposição aqui na conversa!`;
+  const waResult = await sendAutoWhatsAppMessage(order.customer_phone, waText);
+
+  res.json({ success: true, status: 'delivered', whatsappSent: waResult.success });
+});
+
+// 7. Status do WhatsApp Web (para pareamento via QR Code)
+app.get('/api/whatsapp/status', (_req, res) => {
+  res.json(getWhatsAppStatus());
 });
 
 app.use('/api/ecommerce', eco);
@@ -480,7 +497,7 @@ app.use('/api', crud);
 const rootDir = path.join(__dirname, '..', '..');
 const dist = path.join(__dirname, '..', 'client', 'dist');
 
-// Serve a loja raiz (index.html, pedido.html, style.css, etc.)
+// Serve a loja raiz (index.html, pedido.html, whatsapp.html, style.css, etc.)
 app.use(express.static(rootDir));
 
 if (fs.existsSync(dist)) {
@@ -490,4 +507,5 @@ if (fs.existsSync(dist)) {
 app.listen(PORT, () => {
   console.log(`Servidor em http://localhost:${PORT}`);
   startTelegramPolling(db);
+  startWhatsAppService();
 });

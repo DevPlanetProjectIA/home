@@ -1,5 +1,6 @@
 // Serviço de Notificação e Integração com Telegram Bot
 import { PRODUCT_INSTRUCTIONS } from './licenseService.js';
+import { sendAutoWhatsAppMessage } from './whatsappService.js';
 
 let lastUpdateId = 0;
 let isPolling = false;
@@ -106,22 +107,33 @@ async function handleTelegramUpdate(update, db, token) {
 
     const waLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(waText)}`;
 
-    const replyMarkup = cleanPhone ? {
-      inline_keyboard: [
-        [
-          { text: '📲 Enviar no WhatsApp do Cliente (1 Toque)', url: waLink }
+    // Tenta enviar automaticamente pelo robô do WhatsApp
+    const autoResult = await sendAutoWhatsAppMessage(cleanPhone, waText);
+
+    let statusMsg = '';
+    let replyMarkup = null;
+
+    if (autoResult.success) {
+      statusMsg = `🤖 *Mensagem enviada com sucesso e de forma 100% automática para o WhatsApp do cliente (+${cleanPhone})!*`;
+    } else {
+      statusMsg = `⚠️ *Robô do WhatsApp desconectado no servidor.*\nAcesse http://localhost:3000/whatsapp.html para conectar ou clique no botão abaixo para enviar manualmente com 1 toque:`;
+      replyMarkup = cleanPhone ? {
+        inline_keyboard: [
+          [
+            { text: '📲 Enviar no WhatsApp do Cliente (1 Toque)', url: waLink }
+          ]
         ]
-      ]
-    } : null;
+      } : null;
+    }
 
     await sendTelegramMessage(token, chatId,
-      `✅ *Licença Gravada com Sucesso!*\n\n` +
+      `✅ *Licença Registrada!*\n\n` +
       `📦 *Pedido:* \`${order.id}\`\n` +
       `🏷 *Produto:* ${order.product_name}\n` +
       `👤 *Cliente:* ${order.customer_name}\n` +
       `📱 *WhatsApp:* +${cleanPhone || 'Não informado'}\n` +
       `🔑 *Chave:* \`${licenseKey}\`\n\n` +
-      `👇 Clique no botão abaixo para abrir a conversa no seu WhatsApp com a mensagem completa já pronta para enviar:`,
+      `${statusMsg}`,
       replyMarkup
     );
     return;
