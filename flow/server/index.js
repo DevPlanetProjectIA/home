@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -7,6 +8,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import { fulfillOrderLicense } from './licenseService.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
@@ -39,6 +41,32 @@ db.exec(`
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
   );
   CREATE INDEX IF NOT EXISTS idx_records_user_kind ON records(user_id, kind);
+
+  CREATE TABLE IF NOT EXISTS ecommerce_orders (
+    id TEXT PRIMARY KEY,
+    access_token TEXT NOT NULL,
+    product_id TEXT NOT NULL,
+    product_name TEXT NOT NULL,
+    amount REAL NOT NULL,
+    customer_name TEXT NOT NULL,
+    customer_email TEXT NOT NULL,
+    customer_phone TEXT NOT NULL,
+    payment_method TEXT DEFAULT 'pix',
+    payment_provider TEXT DEFAULT 'mercadopago',
+    payment_id TEXT,
+    status TEXT NOT NULL DEFAULT 'pending',
+    qr_code TEXT,
+    qr_code_base64 TEXT,
+    ticket_url TEXT,
+    license_key TEXT,
+    license_instructions TEXT,
+    telegram_message_id TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  );
+  CREATE INDEX IF NOT EXISTS idx_eco_payment ON ecommerce_orders(payment_id);
+  CREATE INDEX IF NOT EXISTS idx_eco_token ON ecommerce_orders(access_token);
+  CREATE INDEX IF NOT EXISTS idx_eco_email ON ecommerce_orders(customer_email);
 `);
 
 const KINDS = new Set(['clients', 'orders', 'stock', 'transactions', 'quotes', 'consigned', 'settings']);
@@ -118,10 +146,10 @@ app.get('/api/public/store/:slug', (req, res) => {
 
 /* ---------- Checkout da loja online (site estático -> Flow) ---------- */
 // CORS: defina ALLOWED_ORIGIN (ex.: https://devplanetprojectia.github.io) para restringir quem pode enviar pedidos.
-app.use('/api/public', (req, res, next) => {
+app.use('/api', (req, res, next) => {
   res.set('Access-Control-Allow-Origin', process.env.ALLOWED_ORIGIN || '*');
-  res.set('Access-Control-Allow-Headers', 'Content-Type');
-  res.set('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.set('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
   if (req.method === 'OPTIONS') return res.sendStatus(204);
   next();
 });
@@ -201,13 +229,247 @@ crud.delete('/:kind/:id', (req, res) => {
   db.prepare('DELETE FROM records WHERE id=? AND user_id=? AND kind=?').run(req.params.id, req.user.id, req.params.kind);
   res.json({ ok: true });
 });
+
+/* ---------- E-commerce, Mercado Pago & Área do Cliente ---------- */
+const eco = express.Router();
+
+// 1. Criar Checkout / Pagamento PIX Mercado Pago
+eco.post('/checkout', async (req, res) => {
+  try {
+    const { name, email, phone, productId, productName, amount } = req.body || {};
+    if (!name || !email || !productId || !amount) {
+      return res.status(400).json({ error: 'Dados incompletos para o checkout.' });
+    }
+
+    const orderId = `ORD-${Date.now().toString(36).toUpperCase()}-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
+    const accessToken = crypto.randomBytes(16).toString('hex');
+    const mpAccessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
+
+    let paymentId = null;
+    let qrCode = '';
+    let qrCodeBase64 = '';
+    let ticketUrl = '';
+    let paymentStatus = 'pending';
+
+    // Integração com Mercado Pago (se Access Token estiver configurado)
+    let checkoutUrl = '';
+    if (mpAccessToken && mpAccessToken.trim().length > 10) {
+      try {
+        const publicUrl = process.env.PUBLIC_BACKEND_URL || `${req.protocol}://${req.get('host')}`;
+
+        // 1. Cria a Preferência do Mercado Pago (Permite Cartão de Crédito, PIX, Boleto)
+        try {
+          const prefRes = await fetch('https://api.mercadopago.com/checkout/preferences', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${mpAccessToken.trim()}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              items: [{
+                id: productId,
+                title: productName || 'Assinatura Digital',
+                quantity: 1,
+                unit_price: Number(amount),
+                currency_id: 'BRL'
+              }],
+              payer: {
+                name: name.trim().split(' ')[0],
+                surname: name.trim().split(' ').slice(1).join(' ') || 'Cliente',
+                email: email.trim().toLowerCase()
+              },
+              external_reference: orderId,
+              ...(publicUrl && publicUrl.startsWith('https://') ? {
+                back_urls: {
+                  success: `${publicUrl}/pedido.html?id=${orderId}&token=${accessToken}`,
+                  failure: `${publicUrl}/pedido.html?id=${orderId}&token=${accessToken}`,
+                  pending: `${publicUrl}/pedido.html?id=${orderId}&token=${accessToken}`
+                },
+                auto_return: 'approved',
+                notification_url: `${publicUrl.replace(/\/$/, '')}/api/ecommerce/webhooks/mercadopago`
+              } : {})
+            })
+          });
+
+          const prefData = await prefRes.json();
+          if (prefRes.ok && prefData.init_point) {
+            checkoutUrl = prefData.init_point;
+            ticketUrl = prefData.init_point;
+          } else {
+            console.warn('[MercadoPago Preference Info]:', prefData);
+          }
+        } catch (prefErr) {
+          console.warn('[MercadoPago Preference Warning]:', prefErr.message);
+        }
+
+        // 2. Tenta gerar PIX Transparente direto (se chave PIX estiver ativada na conta)
+        const mpPayload = {
+          transaction_amount: Number(amount),
+          description: productName || 'Assinatura Digital',
+          payment_method_id: 'pix',
+          payer: {
+            email: email.trim().toLowerCase(),
+            first_name: name.trim().split(' ')[0],
+            last_name: name.trim().split(' ').slice(1).join(' ') || 'Cliente'
+          },
+          external_reference: orderId,
+          ...(publicUrl && publicUrl.startsWith('https://') ? { notification_url: `${publicUrl.replace(/\/$/, '')}/api/ecommerce/webhooks/mercadopago` } : {})
+        };
+
+        const mpRes = await fetch('https://api.mercadopago.com/v1/payments', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${mpAccessToken.trim()}`,
+            'Content-Type': 'application/json',
+            'X-Idempotency-Key': orderId
+          },
+          body: JSON.stringify(mpPayload)
+        });
+
+        const mpData = await mpRes.json();
+        if (mpRes.ok && mpData.id) {
+          paymentId = String(mpData.id);
+          paymentStatus = mpData.status || 'pending';
+          const txData = mpData.point_of_interaction?.transaction_data;
+          qrCode = txData?.qr_code || '';
+          qrCodeBase64 = txData?.qr_code_base64 || '';
+          ticketUrl = txData?.ticket_url || ticketUrl;
+        } else {
+          console.warn('[MercadoPago Info] PIX direto não habilitado na conta, usando Checkout Pro oficial:', mpData.message);
+        }
+      } catch (mpErr) {
+        console.error('[MercadoPago Error]:', mpErr.message);
+      }
+    }
+
+    // Se ainda não gerou QR Code (ambiente de testes/sem token):
+    if (!qrCode) {
+      qrCode = `00020126580014BR.GOV.BCB.PIX0136${orderId}520400005303986540${Number(amount).toFixed(2)}5802BR5913DEVPLLANET6009SAOPAULO62070503***6304SIMU`;
+    }
+
+    // Salva o pedido no banco de dados
+    db.prepare(`
+      INSERT INTO ecommerce_orders (
+        id, access_token, product_id, product_name, amount,
+        customer_name, customer_email, customer_phone,
+        payment_id, status, qr_code, qr_code_base64, ticket_url
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      orderId, accessToken, productId, productName || productId, Number(amount),
+      name.trim(), email.trim().toLowerCase(), phone ? phone.replace(/\D/g, '') : '',
+      paymentId, paymentStatus, qrCode, qrCodeBase64, ticketUrl
+    );
+
+    res.json({
+      success: true,
+      orderId,
+      accessToken,
+      status: paymentStatus,
+      qrCode,
+      qrCodeBase64,
+      ticketUrl: ticketUrl || checkoutUrl,
+      checkoutUrl,
+      isSandbox: !paymentId && !checkoutUrl
+    });
+  } catch (err) {
+    console.error('[Checkout Error]:', err);
+    res.status(500).json({ error: 'Erro ao processar o checkout.' });
+  }
+});
+
+// 2. Consultar Pedido (Área do Cliente com Token Seguro)
+eco.get('/orders/:id', (req, res) => {
+  const { id } = req.params;
+  const { token } = req.query;
+
+  const order = db.prepare('SELECT * FROM ecommerce_orders WHERE id=?').get(id);
+  if (!order) return res.status(404).json({ error: 'Pedido não encontrado.' });
+
+  if (token && order.access_token !== token) {
+    return res.status(403).json({ error: 'Acesso não autorizado para este pedido.' });
+  }
+
+  res.json({
+    id: order.id,
+    productId: order.product_id,
+    productName: order.product_name,
+    amount: order.amount,
+    customerName: order.customer_name,
+    customerEmail: order.customer_email,
+    customerPhone: order.customer_phone,
+    status: order.status,
+    qrCode: order.qr_code,
+    qrCodeBase64: order.qr_code_base64,
+    ticketUrl: order.ticket_url,
+    licenseKey: order.status === 'delivered' ? order.license_key : null,
+    licenseInstructions: order.status === 'delivered' ? order.license_instructions : null,
+    createdAt: order.created_at,
+    updatedAt: order.updated_at
+  });
+});
+
+// 3. Consultar Pedidos por E-mail (Para o cliente recuperar suas licenças)
+eco.get('/customer-orders', (req, res) => {
+  const { email } = req.query;
+  if (!email) return res.status(400).json({ error: 'Informe o e-mail.' });
+
+  const rows = db.prepare('SELECT id, product_name, amount, status, access_token, created_at FROM ecommerce_orders WHERE customer_email=? ORDER BY id DESC').all(email.trim().toLowerCase());
+  res.json({ orders: rows });
+});
+
+// 4. Webhook do Mercado Pago (Recebe notificação de pagamento aprovado)
+eco.post('/webhooks/mercadopago', async (req, res) => {
+  try {
+    const paymentId = req.query['data.id'] || req.query.id || req.body?.data?.id;
+    const mpAccessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
+
+    if (paymentId && mpAccessToken) {
+      const mpRes = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+        headers: { 'Authorization': `Bearer ${mpAccessToken.trim()}` }
+      });
+      const paymentData = await mpRes.json();
+
+      if (paymentData.status === 'approved') {
+        const order = db.prepare('SELECT * FROM ecommerce_orders WHERE payment_id=? OR id=?').get(String(paymentId), paymentData.external_reference);
+        if (order && order.status !== 'delivered') {
+          db.prepare("UPDATE ecommerce_orders SET status='approved', updated_at=CURRENT_TIMESTAMP WHERE id=?").run(order.id);
+          const updatedOrder = db.prepare('SELECT * FROM ecommerce_orders WHERE id=?').get(order.id);
+          await fulfillOrderLicense(updatedOrder, db);
+        }
+      }
+    }
+
+    res.status(200).json({ received: true });
+  } catch (err) {
+    console.error('[Webhook Error]:', err);
+    res.status(200).json({ received: true });
+  }
+});
+
+// 5. Simular Pagamento (Para testes imediatos no painel ou durante desenvolvimento)
+eco.post('/orders/:id/simulate-payment', async (req, res) => {
+  const { id } = req.params;
+  const order = db.prepare('SELECT * FROM ecommerce_orders WHERE id=?').get(id);
+  if (!order) return res.status(404).json({ error: 'Pedido não encontrado.' });
+
+  db.prepare("UPDATE ecommerce_orders SET status='approved', updated_at=CURRENT_TIMESTAMP WHERE id=?").run(order.id);
+  const updatedOrder = db.prepare('SELECT * FROM ecommerce_orders WHERE id=?').get(order.id);
+  const result = await fulfillOrderLicense(updatedOrder, db);
+  res.json({ success: true, ...result });
+});
+
+app.use('/api/ecommerce', eco);
 app.use('/api', crud);
 
 /* ---------- Front-end estático ---------- */
+const rootDir = path.join(__dirname, '..', '..');
 const dist = path.join(__dirname, '..', 'client', 'dist');
+
+// Serve a loja raiz (index.html, pedido.html, style.css, etc.)
+app.use(express.static(rootDir));
+
 if (fs.existsSync(dist)) {
-  app.use(express.static(dist));
-  app.get(/^\/(?!api).*/, (_req, res) => res.sendFile(path.join(dist, 'index.html')));
+  app.use('/flow', express.static(dist));
 }
 
 app.listen(PORT, () => console.log(`Servidor em http://localhost:${PORT}`));

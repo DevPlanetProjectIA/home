@@ -1,0 +1,11 @@
+# Dependências
+node_modules/
+
+# Dados e segredos
+.env
+*.db
+flow/server/data/
+flow/server/.env
+
+# Builds
+flow/client/dist/

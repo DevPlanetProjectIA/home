@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Área do Cliente — Acompanhar Pedido</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.client-wrap { max-width: 860px; margin: 40px auto; padding: 0 20px; }
+.order-card { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 28px; box-shadow: 0 10px 30px #1a1f4a0a; margin-bottom: 24px; }
+.status-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; border-radius: 999px; font-weight: 700; font-size: 0.9rem; margin-bottom: 16px; }
+.status-pending { background: #fef7e0; color: #b06000; border: 1px solid #f9ab00; }
+.status-approved { background: #e8f0fe; color: #1a73e8; border: 1px solid #8ab4f8; }
+.status-delivered { background: #e6f4ea; color: #137333; border: 1px solid #34a853; }
+.license-box { background: #f0fdf4; border: 2px solid #86efac; border-radius: 14px; padding: 20px; margin: 20px 0; }
+.license-key-wrap { display: flex; gap: 10px; align-items: center; margin: 12px 0; flex-wrap: wrap; }
+.license-code { font: 700 1.25rem monospace; background: #fff; padding: 12px 18px; border-radius: 10px; border: 1px solid #bbf7d0; color: #166534; flex: 1; word-break: break-all; }
+.info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 16px 0; background: var(--bg); padding: 18px; border-radius: 14px; }
+.info-item b { display: block; font-size: 0.82rem; color: var(--mut); text-transform: uppercase; letter-spacing: 0.04em; }
+.info-item span { font-weight: 600; font-size: 1.05rem; }
+.guide-box { background: var(--bg); border-radius: 12px; padding: 18px; font-size: 0.95rem; white-space: pre-line; line-height: 1.6; border: 1px solid var(--line); }
+.spinner { width: 22px; height: 22px; border: 3px solid #cbd5e1; border-top-color: var(--ac); border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; vertical-align: middle; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.lookup-card { background: var(--card); border: 1px dashed var(--line); border-radius: 16px; padding: 24px; text-align: center; }
+.lookup-form { display: flex; gap: 10px; max-width: 460px; margin: 14px auto 0; }
+.lookup-form input { flex: 1; }
+.pulse-dot { width: 10px; height: 10px; border-radius: 50%; background: currentColor; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap bar">
+  <a class="brand" href="index.html"><span class="dot"></span><span data-store>DevPlanet Store</span></a>
+  <nav>
+    <a href="index.html">← Voltar à Loja</a>
+    <a class="btn sm" id="wa-help" target="_blank" rel="noopener">WhatsApp Suporte</a>
+  </nav>
+</div></header>
+
+<main class="client-wrap">
+  <div id="loading" class="order-card" style="text-align:center; padding:40px;">
+    <div class="spinner" style="width:36px;height:36px;border-width:4px;"></div>
+    <p class="muted" style="margin-top:16px;">Carregando detalhes do seu pedido...</p>
+  </div>
+
+  <div id="order-view" hidden>
+    <div class="order-card">
+      <div id="status-badge" class="status-badge"></div>
+      <h1 id="prod-title" style="margin: 0 0 8px; font-size:1.8rem;"></h1>
+      <p class="muted" id="order-ref"></p>
+
+      <div class="info-grid">
+        <div class="info-item"><b>Valor Total</b><span id="order-amount" style="color:var(--ac); font-size:1.3rem;"></span></div>
+        <div class="info-item"><b>Cliente</b><span id="order-client"></span></div>
+        <div class="info-item"><b>E-mail</b><span id="order-email"></span></div>
+        <div class="info-item"><b>Data da Compra</b><span id="order-date"></span></div>
+      </div>
+
+      <!-- Estado: Pendente / Pagamento -->
+      <div id="box-pending" hidden>
+        <h3 style="margin: 20px 0 10px;">Pagamento via Mercado Pago</h3>
+        <p class="muted">Escaneie o QR Code ou copie o código PIX abaixo. A confirmação é automática!</p>
+        <div class="pay" style="margin: 16px 0;">
+          <div id="qr-display" style="width:210px; height:210px; border:1px solid var(--line); border-radius:12px; display:flex; align-items:center; justify-content:center; background:#fff; overflow:hidden;"></div>
+          <div>
+            <label>Código PIX Copia e Cola:
+              <textarea id="pix-copy-code" readonly style="height:90px;"></textarea>
+            </label>
+            <div style="margin-top:8px;">
+              <button class="btn alt" id="btn-copy-pix" type="button">Copiar código PIX</button>
+              <button class="btn sm" id="btn-simulate" type="button" style="background:#64748b;" title="Simula a aprovação do webhook">Simular aprovação (Teste)</button>
+            </div>
+            <div id="mp-checkout-btn-wrap" style="margin-top:14px;" hidden>
+              <a class="btn big" id="btn-mp-redirect" href="#" target="_blank" rel="noopener" style="background:#009ee3; display:inline-flex; align-items:center; gap:8px;">
+                <span>Pagar com Mercado Pago (Cartão / PIX) →</span>
+              </a>
+            </div>
+            <p class="muted sm" style="display:flex; align-items:center; gap:8px; margin-top:14px;">
+              <span class="spinner"></span> Aguardando confirmação do pagamento pelo Mercado Pago...
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estado: Aprovado / Processando -->
+      <div id="box-processing" hidden style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:14px; padding:22px; text-align:center; margin:20px 0;">
+        <div class="spinner" style="width:30px;height:30px;border-width:3px; border-top-color:#2563eb;"></div>
+        <h3 style="color:#1e40af; margin:12px 0 6px;">Pagamento Confirmado!</h3>
+        <p class="muted" style="margin:0;">Estamos gerando e liberando sua licença automaticamente. Isso leva apenas alguns segundos...</p>
+      </div>
+
+      <!-- Estado: Entregue (Licença Liberada) -->
+      <div id="box-delivered" hidden>
+        <div class="license-box">
+          <div style="display:flex; align-items:center; gap:8px; color:#15803d;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <h3 style="margin:0;">Sua Licença está Pronta!</h3>
+          </div>
+          <p class="muted" style="margin:8px 0 14px;">Utilize a chave abaixo para ativação do seu produto:</p>
+          
+          <div class="license-key-wrap">
+            <span class="license-code" id="license-key-display"></span>
+            <button class="btn" id="btn-copy-license" type="button">Copiar Licença</button>
+          </div>
+
+          <h4 style="margin: 18px 0 8px; color:var(--ink);">Instruções de Ativação:</h4>
+          <div class="guide-box" id="license-guide-display"></div>
+        </div>
+      </div>
+
+      <div style="margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--line); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+        <span class="muted sm">Dúvidas com a instalação?</span>
+        <a class="btn wa" id="wa-order-help" target="_blank" rel="noopener">Falar com Suporte no WhatsApp</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Buscar por E-mail -->
+  <div class="lookup-card">
+    <h3 style="margin:0 0 6px;">Buscar outros pedidos</h3>
+    <p class="muted sm" style="margin:0;">Digite seu e-mail para localizar todas as suas licenças e pedidos.</p>
+    <form class="lookup-form" id="lookup-form">
+      <input type="email" id="lookup-email" placeholder="seu@email.com" required>
+      <button class="btn" type="submit">Buscar</button>
+    </form>
+    <div id="lookup-results" style="margin-top:16px;" hidden></div>
+  </div>
+</main>
+
+<script src="config.js"></script>
+<script src="qr.js"></script>
+<script>
+const params = new URLSearchParams(window.location.search);
+const orderId = params.get("id");
+const token = params.get("token");
+
+const apiUrl = (typeof CONFIG !== 'undefined' && CONFIG.flowApi) ? CONFIG.flowApi : window.location.origin;
+const waNumber = (typeof CONFIG !== 'undefined' && CONFIG.whatsapp) ? CONFIG.whatsapp : "5521983110332";
+
+document.getElementById("wa-help").href = `https://wa.me/${waNumber}?text=${encodeURIComponent("Olá! Preciso de ajuda com meu pedido.")}`;
+
+let pollTimer = null;
+
+async function loadOrder() {
+  if (!orderId) {
+    document.getElementById("loading").innerHTML = `
+      <h2>Nenhum pedido selecionado</h2>
+      <p class="muted">Informe o ID do pedido na URL ou utilize o campo abaixo para buscar pelo seu e-mail.</p>`;
+    return;
+  }
+
+  try {
+    const res = await fetch(`${apiUrl}/api/ecommerce/orders/${encodeURIComponent(orderId)}${token ? `?token=${encodeURIComponent(token)}` : ''}`);
+    if (!res.ok) throw new Error("Pedido não encontrado");
+    const order = await res.json();
+    renderOrder(order);
+
+    // Se o pedido ainda estiver pendente ou em processamento, pesquisa a cada 3 segundos
+    if (order.status === 'pending' || order.status === 'approved' || order.status === 'processing_license') {
+      if (!pollTimer) {
+        pollTimer = setInterval(loadOrder, 3000);
+      }
+    } else {
+      if (pollTimer) {
+        clearInterval(pollTimer);
+        pollTimer = null;
+      }
+    }
+  } catch (err) {
+    document.getElementById("loading").innerHTML = `
+      <h2 style="color:#c5221f;">Pedido não encontrado</h2>
+      <p class="muted">Verifique o código informado ou tente buscar pelo seu e-mail abaixo.</p>`;
+  }
+}
+
+function renderOrder(o) {
+  document.getElementById("loading").hidden = true;
+  const view = document.getElementById("order-view");
+  view.hidden = false;
+
+  document.getElementById("prod-title").textContent = o.productName;
+  document.getElementById("order-ref").textContent = `Código do Pedido: ${o.id}`;
+  document.getElementById("order-amount").textContent = Number(o.amount).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  document.getElementById("order-client").textContent = o.customerName;
+  document.getElementById("order-email").textContent = o.customerEmail;
+  document.getElementById("order-date").textContent = new Date(o.createdAt).toLocaleString('pt-BR');
+
+  const badge = document.getElementById("status-badge");
+  const pendingBox = document.getElementById("box-pending");
+  const procBox = document.getElementById("box-processing");
+  const delivBox = document.getElementById("box-delivered");
+
+  pendingBox.hidden = true;
+  procBox.hidden = true;
+  delivBox.hidden = true;
+
+  if (o.status === 'delivered') {
+    badge.className = "status-badge status-delivered";
+    badge.innerHTML = `<span class="pulse-dot"></span> Licença Entregue & Ativa`;
+    delivBox.hidden = false;
+    document.getElementById("license-key-display").textContent = o.licenseKey || "CÓDIGO-LIBERADO";
+    document.getElementById("license-guide-display").textContent = o.licenseInstructions || "Licença pronta para uso.";
+  } else if (o.status === 'approved' || o.status === 'processing_license') {
+    badge.className = "status-badge status-approved";
+    badge.innerHTML = `<span class="spinner" style="width:14px;height:14px;border-width:2px;"></span> Pagamento Aprovado — Gerando Licença`;
+    procBox.hidden = false;
+  } else {
+    badge.className = "status-badge status-pending";
+    badge.innerHTML = `<span class="pulse-dot"></span> Aguardando Pagamento (PIX)`;
+    pendingBox.hidden = false;
+
+    // QR Code
+    const qrEl = document.getElementById("qr-display");
+    if (o.qrCodeBase64) {
+      qrEl.innerHTML = `<img src="data:image/png;base64,${o.qrCodeBase64}" style="width:100%;height:100%;object-fit:contain;" alt="QR Code PIX">`;
+    } else if (typeof QR !== 'undefined' && o.qrCode) {
+      qrEl.innerHTML = QR.svg(o.qrCode);
+    } else {
+      qrEl.textContent = "QR Code indisponível";
+    }
+
+    document.getElementById("pix-copy-code").value = o.qrCode || "";
+
+    const mpWrap = document.getElementById("mp-checkout-btn-wrap");
+    const mpBtn = document.getElementById("btn-mp-redirect");
+    if (o.ticketUrl && o.ticketUrl.includes("mercadopago")) {
+      mpBtn.href = o.ticketUrl;
+      mpWrap.hidden = false;
+    } else {
+      mpWrap.hidden = true;
+    }
+  }
+
+  // WhatsApp de suporte específico deste pedido
+  document.getElementById("wa-order-help").href = `https://wa.me/${waNumber}?text=${encodeURIComponent(`Olá! Gostaria de suporte sobre o pedido ${o.id} (${o.productName}).`)}`;
+}
+
+// Botões de cópia
+document.getElementById("btn-copy-pix").onclick = async () => {
+  const code = document.getElementById("pix-copy-code").value;
+  await navigator.clipboard.writeText(code);
+  const btn = document.getElementById("btn-copy-pix");
+  btn.textContent = "Copiado ✓";
+  setTimeout(() => { btn.textContent = "Copiar código PIX"; }, 2000);
+};
+
+document.getElementById("btn-copy-license").onclick = async () => {
+  const key = document.getElementById("license-key-display").textContent;
+  await navigator.clipboard.writeText(key);
+  const btn = document.getElementById("btn-copy-license");
+  btn.textContent = "Copiado ✓";
+  setTimeout(() => { btn.textContent = "Copiar Licença"; }, 2000);
+};
+
+// Botão de simular aprovação
+document.getElementById("btn-simulate").onclick = async () => {
+  const btn = document.getElementById("btn-simulate");
+  btn.disabled = true;
+  btn.textContent = "Simulando...";
+  try {
+    const res = await fetch(`${apiUrl}/api/ecommerce/orders/${encodeURIComponent(orderId)}/simulate-payment`, { method: 'POST' });
+    const data = await res.json();
+    if (data.success) {
+      loadOrder();
+    }
+  } catch (err) {
+    alert("Erro ao simular: " + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Simular aprovação (Teste)";
+  }
+};
+
+// Buscar pedidos por e-mail
+document.getElementById("lookup-form").onsubmit = async (e) => {
+  e.preventDefault();
+  const email = document.getElementById("lookup-email").value.trim();
+  const resEl = document.getElementById("lookup-results");
+  resEl.hidden = false;
+  resEl.innerHTML = `<span class="spinner"></span> Buscando pedidos...`;
+
+  try {
+    const res = await fetch(`${apiUrl}/api/ecommerce/customer-orders?email=${encodeURIComponent(email)}`);
+    const data = await res.json();
+    if (!data.orders || data.orders.length === 0) {
+      resEl.innerHTML = `<p class="muted">Nenhum pedido encontrado para o e-mail informado.</p>`;
+      return;
+    }
+    resEl.innerHTML = `<ul style="list-style:none; padding:0; display:grid; gap:8px;">` +
+      data.orders.map(o => `
+        <li style="background:var(--bg); padding:10px 14px; border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
+          <div><b>${o.product_name}</b> <span class="muted sm">(${o.id})</span></div>
+          <a class="btn sm" href="pedido.html?id=${encodeURIComponent(o.id)}&token=${encodeURIComponent(o.access_token)}">Abrir Pedido</a>
+        </li>`).join('') + `</ul>`;
+  } catch (err) {
+    resEl.innerHTML = `<p class="err">Erro ao buscar pedidos.</p>`;
+  }
+};
+
+loadOrder();
+</script>
+</body>
+</html>

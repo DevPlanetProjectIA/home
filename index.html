@@ -10,7 +10,7 @@
 <body>
 <header class="top"><div class="wrap bar">
   <a class="brand" href="#"><span class="dot"></span><span data-store></span></a>
-  <nav><a href="#produtos">Produtos</a><a href="#como">Como funciona</a><a href="#faq">Dúvidas</a><a href="calculadora.html">Calculadora</a><a href="orcamento.html">Orçamento</a><a class="btn sm" id="help" target="_blank" rel="noopener">WhatsApp</a></nav>
+  <nav><a href="#produtos">Produtos</a><a href="#como">Como funciona</a><a href="#faq">Dúvidas</a><a href="pedido.html">Área do Cliente</a><a href="calculadora.html">Calculadora</a><a href="orcamento.html">Orçamento</a><a class="btn sm" id="help" target="_blank" rel="noopener">WhatsApp</a></nav>
 </div></header>
 
 <section class="hero"><div class="wrap">
@@ -78,10 +78,12 @@
   <div id="s-pix" hidden>
     <h2>Pague <span id="pay-total"></span> via PIX</h2>
     <div class="pay"><div id="qr" aria-label="QR Code PIX"></div>
-    <div><p class="muted">Escaneie o QR Code ou use o copia e cola. Depois de pagar, envie o comprovante pelo botão verde.</p>
+    <div><p class="muted">Escaneie o QR Code ou use o copia e cola. A confirmação é automática via Mercado Pago!</p>
     <textarea id="code" readonly></textarea>
     <button class="btn alt" id="copy" type="button">Copiar código PIX</button>
-    <a class="btn wa" id="paid" target="_blank" rel="noopener">Já paguei — ir para o WhatsApp</a></div></div>
+    <a class="btn" id="btn-mp-pay" href="#" target="_blank" rel="noopener" style="background:#009ee3; margin-top:6px; display:none;">Pagar no Mercado Pago (Cartão / PIX) →</a>
+    <a class="btn" id="btn-open-order" href="pedido.html" style="margin-top:6px; display:inline-block;">Acompanhar Pedido &amp; Ver Licença →</a>
+    <a class="btn wa" id="paid" target="_blank" rel="noopener" style="margin-top:6px; display:inline-block;">Falar no WhatsApp</a></div></div>
   </div>
 </div></dialog>
 

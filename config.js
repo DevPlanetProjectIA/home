@@ -5,10 +5,11 @@ const CONFIG = {
   pixName: "BRUNO LACERDA TOLEDO", // nome do recebedor (até 25 caracteres)
   pixCity: "RIO DE JANEIRO",
   whatsapp: "5521983110332",
-  // Integração com o Flow (sistema de gestão). Deixe flowApi vazio para desativar.
-  flowApi: "",                     // ex.: "https://flow.seudominio.com"
+  // Integração com o backend (Mercado Pago, Área do Cliente e Flow).
+  // Em localhost usa http://localhost:3000; em produção, defina a URL do seu servidor hospedado (ex: Render).
+  flowApi: (window.location.protocol === "file:" || window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") ? "http://localhost:3000" : "",
   flowUrl: "",                     // endereço público do Flow (mostra o link "Área do vendedor" no rodapé)
   storeSlug: "",
   salesBefore: 30,                 // vendas feitas antes do Flow estar registrando (some às vendas "entregues" no Flow)
-  goatcounter: "",                 // código do GoatCounter (contador de acessos), ex.: "minhaloja" -> minhaloja.goatcounter.com                   // mesmo "slug da loja" configurado em Configurações no Flow
+  goatcounter: "",                 // código do GoatCounter (contador de acessos), ex.: "minhaloja" -> minhaloja.goatcounter.com
 };
