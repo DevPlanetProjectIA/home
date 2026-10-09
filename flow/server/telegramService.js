@@ -90,13 +90,39 @@ async function handleTelegramUpdate(update, db, token) {
       WHERE id=?
     `).run(licenseKey, prodInfo.guide, order.id);
 
+    // Formatar telefone do cliente para o WhatsApp
+    let cleanPhone = (order.customer_phone || '').replace(/\D/g, '');
+    if (cleanPhone.length >= 10 && !cleanPhone.startsWith('55')) {
+      cleanPhone = '55' + cleanPhone;
+    }
+
+    const waText = 
+      `Olá, ${order.customer_name}! 🚀\n` +
+      `Aqui está a sua licença adquirida na DevPlanet Store:\n\n` +
+      `📦 *Produto:* ${order.product_name}\n` +
+      `🔑 *Chave de Ativação:*\n${licenseKey}\n\n` +
+      `📖 *Instruções de Ativação:*\n${prodInfo.guide}\n\n` +
+      `Qualquer dúvida ou suporte, estou à disposição aqui na conversa!`;
+
+    const waLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(waText)}`;
+
+    const replyMarkup = cleanPhone ? {
+      inline_keyboard: [
+        [
+          { text: '📲 Enviar no WhatsApp do Cliente (1 Toque)', url: waLink }
+        ]
+      ]
+    } : null;
+
     await sendTelegramMessage(token, chatId,
-      `✅ *Licença Entregue com Sucesso!*\n\n` +
+      `✅ *Licença Gravada com Sucesso!*\n\n` +
       `📦 *Pedido:* \`${order.id}\`\n` +
       `🏷 *Produto:* ${order.product_name}\n` +
       `👤 *Cliente:* ${order.customer_name}\n` +
+      `📱 *WhatsApp:* +${cleanPhone || 'Não informado'}\n` +
       `🔑 *Chave:* \`${licenseKey}\`\n\n` +
-      `O cliente já recebeu e pode visualizar a chave na Área do Cliente!`
+      `👇 Clique no botão abaixo para abrir a conversa no seu WhatsApp com a mensagem completa já pronta para enviar:`,
+      replyMarkup
     );
     return;
   }
@@ -149,16 +175,20 @@ export async function notifyAdminNewOrder(order) {
 /**
  * Helper para envio de mensagem formatada
  */
-async function sendTelegramMessage(token, chatId, text) {
+async function sendTelegramMessage(token, chatId, text, replyMarkup = null) {
   try {
+    const payload = {
+      chat_id: chatId,
+      text,
+      parse_mode: 'Markdown'
+    };
+    if (replyMarkup) {
+      payload.reply_markup = replyMarkup;
+    }
     await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text,
-        parse_mode: 'Markdown'
-      })
+      body: JSON.stringify(payload)
     });
   } catch (err) {
     console.error('[Telegram Error] Falha ao enviar mensagem:', err.message);
