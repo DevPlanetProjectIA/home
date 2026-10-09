@@ -55,7 +55,7 @@ async function handleTelegramUpdate(update, db, token) {
       `Seu Telegram foi conectado com sucesso à *DevPlanet Store*!\n` +
       `🆔 Seu Chat ID: \`${chatId}\`\n\n` +
       `Sempre que uma venda for aprovada pelo Mercado Pago, enviarei a notificação aqui.\n` +
-      `Basta você responder a notificação com a chave da licença comprada no GGSoma 2 para liberar para o cliente!`
+      `Basta você responder a notificação com a chave da licença para enviar diretamente ao cliente!`
     );
     return;
   }
@@ -177,8 +177,7 @@ export async function notifyAdminNewOrder(order) {
     `📱 *Telefone:* ${order.customer_phone || 'Não informado'}\n\n` +
     `━━━━━━━━━━━━━━━━━━━━\n` +
     `🛒 *Para entregar a licença:*\n` +
-    `1. Compre a licença no *GGSoma 2 bot*.\n` +
-    `2. *Responda esta mensagem* com o código da licença recebido!\n` +
+    `*Responda esta mensagem* com o código da licença para enviar ao cliente no WhatsApp!\n` +
     `*(Ou digite: \`/entregar ${order.id} CODIGO_DA_LICENCA\`)*`;
 
   await sendTelegramMessage(token, adminChatId, text);
