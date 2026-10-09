@@ -9,6 +9,7 @@ import fs from 'node:fs';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { fulfillOrderLicense } from './licenseService.js';
+import { startTelegramPolling, notifyAdminNewOrder } from './telegramService.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
@@ -434,7 +435,7 @@ eco.post('/webhooks/mercadopago', async (req, res) => {
         if (order && order.status !== 'delivered') {
           db.prepare("UPDATE ecommerce_orders SET status='approved', updated_at=CURRENT_TIMESTAMP WHERE id=?").run(order.id);
           const updatedOrder = db.prepare('SELECT * FROM ecommerce_orders WHERE id=?').get(order.id);
-          await fulfillOrderLicense(updatedOrder, db);
+          await notifyAdminNewOrder(updatedOrder);
         }
       }
     }
@@ -446,7 +447,7 @@ eco.post('/webhooks/mercadopago', async (req, res) => {
   }
 });
 
-// 5. Simular Pagamento (Para testes imediatos no painel ou durante desenvolvimento)
+// 5. Simular Pagamento (Para testes no painel)
 eco.post('/orders/:id/simulate-payment', async (req, res) => {
   const { id } = req.params;
   const order = db.prepare('SELECT * FROM ecommerce_orders WHERE id=?').get(id);
@@ -454,8 +455,22 @@ eco.post('/orders/:id/simulate-payment', async (req, res) => {
 
   db.prepare("UPDATE ecommerce_orders SET status='approved', updated_at=CURRENT_TIMESTAMP WHERE id=?").run(order.id);
   const updatedOrder = db.prepare('SELECT * FROM ecommerce_orders WHERE id=?').get(order.id);
-  const result = await fulfillOrderLicense(updatedOrder, db);
-  res.json({ success: true, ...result });
+  await notifyAdminNewOrder(updatedOrder);
+  res.json({ success: true, message: 'Pagamento aprovado e alerta enviado ao Telegram do administrador!' });
+});
+
+// 6. Entregar Licença Manualmente (Web ou API)
+eco.post('/orders/:id/deliver', (req, res) => {
+  const { id } = req.params;
+  const { licenseKey } = req.body || {};
+  if (!licenseKey) return res.status(400).json({ error: 'Informe a chave da licença.' });
+
+  const order = db.prepare('SELECT * FROM ecommerce_orders WHERE id=?').get(id);
+  if (!order) return res.status(404).json({ error: 'Pedido não encontrado.' });
+
+  const prodInfo = PRODUCT_INSTRUCTIONS[order.product_id] || { guide: 'Siga as instruções com sua chave para ativar.' };
+  db.prepare("UPDATE ecommerce_orders SET status='delivered', license_key=?, license_instructions=?, updated_at=CURRENT_TIMESTAMP WHERE id=?").run(licenseKey.trim(), prodInfo.guide, order.id);
+  res.json({ success: true, status: 'delivered' });
 });
 
 app.use('/api/ecommerce', eco);
@@ -472,4 +487,7 @@ if (fs.existsSync(dist)) {
   app.use('/flow', express.static(dist));
 }
 
-app.listen(PORT, () => console.log(`Servidor em http://localhost:${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Servidor em http://localhost:${PORT}`);
+  startTelegramPolling(db);
+});
