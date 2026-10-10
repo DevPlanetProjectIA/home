@@ -515,4 +515,21 @@ app.listen(PORT, () => {
   console.log(`Servidor em http://localhost:${PORT}`);
   startTelegramPolling(db);
   startWhatsAppService();
+
+  // Keep-alive automático para evitar que o Render entre em modo de espera (sleep após 15 min)
+  const keepAliveUrl = process.env.PUBLIC_BACKEND_URL;
+  if (keepAliveUrl && keepAliveUrl.startsWith('https://')) {
+    const PING_MS = 9 * 60 * 1000; // 9 minutos
+    console.log(`[KeepAlive] Ativado a cada 9 minutos para: ${keepAliveUrl}`);
+    setInterval(async () => {
+      try {
+        const pingRes = await fetch(`${keepAliveUrl.replace(/\/$/, '')}/api/health`);
+        if (pingRes.ok) {
+          console.log(`[KeepAlive] Ping executado com sucesso: ${new Date().toISOString()}`);
+        }
+      } catch (err) {
+        console.warn(`[KeepAlive Aviso]:`, err.message);
+      }
+    }, PING_MS);
+  }
 });
