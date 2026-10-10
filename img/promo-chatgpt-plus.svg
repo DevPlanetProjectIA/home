@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif">
+<defs><linearGradient id="og" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#10a37f"/><stop offset=".6" stop-color="#1a7f64"/><stop offset="1" stop-color="#0b4637"/></linearGradient></defs>
+<rect width="640" height="360" fill="url(#og)"/>
+<circle cx="560" cy="70" r="150" fill="#fff" opacity=".08"/><circle cx="90" cy="330" r="120" fill="#fff" opacity=".08"/>
+<text x="40" y="70" fill="#fff" opacity=".9" font-size="22" font-weight="700" letter-spacing="3">ACESSO PRIVADO</text>
+<text x="40" y="150" fill="#fff" font-size="80" font-weight="900">GPT-4o PLUS</text>
+<text x="40" y="198" fill="#fff" font-size="26" font-weight="800">DALL-E 3, Navegação Web e Voz Avançada</text>
+<rect x="40" y="250" width="220" height="86" rx="22" fill="#fff"/>
+<text x="150" y="302" fill="#10a37f" font-size="48" font-weight="900" text-anchor="middle">PLUS</text>
+<text x="150" y="326" fill="#5d6380" font-size="14" font-weight="700" text-anchor="middle">SEM FILAS</text>
+<rect x="280" y="276" width="280" height="38" rx="19" fill="#fff" opacity=".95"/>
+<text x="420" y="301" fill="#10142b" font-size="16" font-weight="800" text-anchor="middle">ENTREGA AUTOMÁTICA</text>
+</svg>

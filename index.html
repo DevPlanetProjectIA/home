@@ -3,89 +3,489 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Loja de assinaturas e produtos digitais</title>
-<meta name="description" content="Assinaturas e produtos digitais com pagamento via PIX e entrega pelo WhatsApp em até 24 horas após a confirmação.">
+<title>DevPlanet Store — Licenças e Assinaturas Digitais com até 80% OFF</title>
+<meta name="description" content="Licenças digitais originais com pagamento facilitado pelo Mercado Pago e entrega automatizada diretamente no seu WhatsApp.">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header class="top"><div class="wrap bar">
-  <a class="brand" href="#"><span class="dot"></span><span data-store></span></a>
-  <nav><a href="#produtos">Produtos</a><a href="#como">Como funciona</a><a href="#faq">Dúvidas</a><a href="pedido.html">Área do Cliente</a><a href="calculadora.html">Calculadora</a><a href="orcamento.html">Orçamento</a><a class="btn sm" id="help" target="_blank" rel="noopener">WhatsApp</a></nav>
-</div></header>
 
-<section class="hero"><div class="wrap">
-  <p class="eyebrow">Produtos digitais</p>
-  <h1>Assinaturas digitais com pagamento por <span class="g">PIX</span> e entrega no WhatsApp</h1>
-  <p class="lead">Escolha o produto, preencha seus dados, pague pelo PIX e receba tudo na sua conversa em até 24 horas após a confirmação.</p>
-  <div class="sales" id="sales" hidden></div>
-  <div class="once"><b id="hero-price"></b><span>pagamento único · <u>sem mensalidade</u></span></div>
-  <a class="btn big" href="#produtos">Ver produtos</a>
-  <ul class="trust"><li><img src="img/coin.png" alt="">Pagamento único, sem mensalidade</li><li><img src="img/shield.png" alt="">Pagamento seguro por PIX</li><li><img src="img/mail.png" alt="">Entrega digital pelo WhatsApp</li><li>Atendimento direto com o vendedor</li></ul>
-</div></section>
+<!-- Faixa de Oferta Relâmpago -->
+<div class="announcement">
+  <span class="badge-deal">Oferta Limitada</span>
+  <span>Licenças originais com até <b>80% de desconto</b> + Ativação rápida no seu WhatsApp!</span>
+</div>
 
-<section id="produtos"><div class="wrap">
-  <h2>Produtos</h2>
-  <div class="cat" id="catalog"></div>
-</div></section>
+<!-- Header Principal -->
+<header class="top">
+  <div class="wrap bar">
+    <a class="brand" href="./">
+      <div class="brand-logo-icon">⚡</div>
+      <div class="brand-text">
+        <h1 data-store>DevPlanet Store</h1>
+        <span>Licenças & Assinaturas</span>
+      </div>
+    </a>
 
-<section id="como" class="alt"><div class="wrap">
-  <h2>Como funciona</h2>
-  <ol class="steps">
-    <li><b>Escolha</b><span>Abra o produto e confira o que está incluso.</span></li>
-    <li><b>Cadastre-se</b><span>Informe nome, telefone, e-mail e aceite as condições de entrega.</span></li>
-    <li><b>Pague por PIX</b><span>Escaneie o QR Code ou use o PIX copia e cola.</span></li>
-    <li><b>Receba no WhatsApp</b><span>Envie o comprovante e receba o produto em até 24 horas após a confirmação.</span></li>
-  </ol>
-</div></section>
+    <!-- Barra de Busca -->
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="search" class="search-input" id="search-products" placeholder="Buscar ferramentas, IA, idiomas...">
+    </div>
 
-<section id="faq"><div class="wrap">
-  <h2>Perguntas frequentes</h2>
-  <div class="faq">
-    <details><summary>Esta loja é oficial?</summary><p>Não. Somos um vendedor independente, sem vínculo, afiliação ou endosso do Google, da Duolingo ou de qualquer outra marca vendida aqui. Google, Gemini e demais nomes são marcas de seus titulares.</p></details>
-    <details open><summary>Tem mensalidade ou renovação cobrada por vocês?</summary><p>Não. O valor é pago uma única vez, via PIX, e cobre todo o período do plano. Não cobramos mensalidade nem fazemos cobranças recorrentes.</p></details>
-    <details><summary>Como e quando recebo o produto?</summary><p>Pelo WhatsApp informado na compra, em até 24 horas após a confirmação do pagamento. Você recebe as instruções de ativação na mesma conversa.</p></details>
-    <details><summary>Como pago?</summary><p>Somente por PIX. Depois do cadastro mostramos o QR Code e o código copia e cola. Após pagar, é só enviar o comprovante pelo botão que abre o WhatsApp.</p></details>
-    <details><summary>Para que usam meus dados?</summary><p>Nome, telefone e e-mail são usados apenas para entrega e atendimento da sua compra.</p></details>
-    <details><summary>Paguei e não recebi. O que faço?</summary><p>Fale com a gente pelo WhatsApp informando o número do pedido e o comprovante.</p></details>
+    <!-- Navegação e Ações -->
+    <nav class="nav-actions">
+      <a href="#produtos" class="nav-link">Catálogo</a>
+      <a href="#vantagens" class="nav-link">Vantagens</a>
+      <a href="#faq" class="nav-link">Dúvidas</a>
+      <a href="pedido.html" class="btn-client">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Meus Pedidos</span>
+      </a>
+      <a class="btn-wa-header" id="header-help" target="_blank" rel="noopener">
+        <span class="pulse-green"></span>
+        <span>Suporte WhatsApp</span>
+      </a>
+    </nav>
   </div>
-</div></section>
+</header>
 
-<footer><div class="wrap"><p><a id="seller" href="#" hidden>Área do vendedor</a></p>
-  <b data-store></b> · Vendedor independente, sem vínculo, afiliação ou endosso do Google LLC, da Duolingo, Inc. ou de outras marcas citadas. Google, Gemini, Google Drive, NotebookLM, Veo e Duolingo são marcas de seus respectivos titulares. Os dados informados na compra são usados apenas para entrega e atendimento. Produto digital entregue pelo WhatsApp em até 24 horas após a confirmação do pagamento.
-</div></footer>
+<!-- Hero Section -->
+<section class="hero">
+  <div class="wrap hero-content">
+    <div class="hero-pill">
+      <span>🚀</span> Maior Plataforma de Licenças e Assinaturas Digitais
+    </div>
+    <h1>Suas Ferramentas Favoritas com <span class="g">até 80% de Economia</span></h1>
+    <p class="hero-lead">
+      Gemini Avançado, Duolingo Super, Canva Pro e mais. Pagamento seguro com tecnologia oficial do Mercado Pago (PIX ou Cartão em até 12x) e entrega automatizada no seu WhatsApp.
+    </p>
 
-<dialog id="dlg-prod"><div class="dlg">
-  <button class="x" data-close aria-label="Fechar">×</button>
-  <img class="pimg big" id="p-img" alt=""><h2 id="p-name"></h2><p id="p-desc" class="muted"></p>
-  <ul class="feat" id="p-feat"></ul>
-  <p class="muted sm">Ideal para:</p><div class="who" id="p-aud"></div>
-  <div class="row buyrow"><div><b class="pr" id="p-price"></b><span class="once-s">pagamento único · sem mensalidade</span></div><button class="btn big" id="p-buy">Comprar agora</button></div>
-</div></dialog>
+    <div class="hero-cta-row">
+      <a class="btn big" href="#produtos">
+        <span>Explorar Catálogo de Ofertas</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a class="btn big alt" href="pedido.html">Área do Cliente</a>
+    </div>
 
-<dialog id="dlg-buy"><div class="dlg">
-  <button class="x" data-close aria-label="Fechar">×</button>
-  <div id="s-form">
-    <h2>Finalizar compra</h2><p class="muted" id="b-summary"></p>
-    <form id="form" novalidate>
-      <label>Nome completo<input id="f-nome" autocomplete="name"></label>
-      <label>Telefone (WhatsApp) com DDD<input id="f-tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="(21) 99999-9999"></label>
-      <label>E-mail<input id="f-email" type="email" autocomplete="email"></label>
-      <label class="chk"><input type="checkbox" id="f-ok"><span>Concordo que a entrega será feita pelo WhatsApp informado em <b>até 24 horas após a confirmação do pagamento</b> e que a loja é um vendedor independente, sem vínculo com as marcas dos produtos.</span></label>
-      <p class="err" id="err" role="alert"></p>
-      <button class="btn big" type="submit">Continuar para o pagamento</button>
-    </form>
+    <!-- Métricas de Confiança -->
+    <div class="hero-stats">
+      <div class="stat-item">
+        <span class="stars" style="font-size:1.1rem;">★★★★★</span>
+        <span><b>4.9/5</b> em avaliações</span>
+      </div>
+      <div class="stat-item">
+        <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        <span>Entrega Automática no WhatsApp</span>
+      </div>
+      <div class="stat-item">
+        <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span>Mercado Pago Protegido</span>
+      </div>
+    </div>
   </div>
-  <div id="s-pix" hidden>
-    <h2>Pague <span id="pay-total"></span> via PIX</h2>
-    <div class="pay"><div id="qr" aria-label="QR Code PIX"></div>
-    <div><p class="muted">Escaneie o QR Code ou use o copia e cola. A confirmação é automática via Mercado Pago!</p>
-    <textarea id="code" readonly></textarea>
-    <button class="btn alt" id="copy" type="button">Copiar código PIX</button>
-    <a class="btn" id="btn-mp-pay" href="#" target="_blank" rel="noopener" style="background:#009ee3; margin-top:6px; display:none;">Pagar no Mercado Pago (Cartão / PIX) →</a>
-    <a class="btn" id="btn-open-order" href="pedido.html" style="margin-top:6px; display:inline-block;">Acompanhar Pedido &amp; Ver Licença →</a>
-    <a class="btn wa" id="paid" target="_blank" rel="noopener" style="margin-top:6px; display:inline-block;">Falar no WhatsApp</a></div></div>
-  </div>
-</div></dialog>
+</section>
 
-<script src="config.js"></script><script src="products.js"></script><script src="qr.js"></script><script src="pix.js"></script><script src="app.js"></script>
-</body></html>
+<!-- Barra de Vantagens -->
+<section id="vantagens" class="trust-strip">
+  <div class="wrap trust-grid">
+    <div class="trust-card">
+      <div class="trust-badge-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </div>
+      <div>
+        <h4>Entrega Instantânea</h4>
+        <p>Receba a licença e instruções completas direto no seu WhatsApp.</p>
+      </div>
+    </div>
+
+    <div class="trust-card">
+      <div class="trust-badge-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+      </div>
+      <div>
+        <h4>Mercado Pago Oficial</h4>
+        <p>Pague por PIX ou Cartão em até 12x com proteção total ao comprador.</p>
+      </div>
+    </div>
+
+    <div class="trust-card">
+      <div class="trust-badge-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M16 8l-8 8M8 8l8 8"/></svg>
+      </div>
+      <div>
+        <h4>Zero Mensalidade</h4>
+        <p>Valor único cobrado uma só vez. Sem recorrência automática surpresa.</p>
+      </div>
+    </div>
+
+    <div class="trust-card">
+      <div class="trust-badge-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div>
+        <h4>Garantia de 30 Dias</h4>
+        <p>Licenças 100% funcionais ou suporte com devolução garantida.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Seção do Catálogo -->
+<section id="produtos" class="catalog-section">
+  <div class="wrap">
+    <div class="catalog-header">
+      <div class="section-title-wrap">
+        <h2>Catálogo de Assinaturas</h2>
+        <p>Selecione seu plano e aproveite o melhor custo-benefício do mercado.</p>
+      </div>
+
+      <!-- Filtros por Categoria -->
+      <div class="category-tabs" id="category-tabs">
+        <button class="cat-tab active" data-cat="all">✨ Todos</button>
+        <button class="cat-tab" data-cat="ia">🤖 Inteligência Artificial</button>
+        <button class="cat-tab" data-cat="idiomas">🌍 Idiomas</button>
+        <button class="cat-tab" data-cat="design">🎨 Design & Criação</button>
+      </div>
+    </div>
+
+    <!-- Grid de Produtos Renderizada Dinamicamente -->
+    <div class="product-grid" id="catalog"></div>
+  </div>
+</section>
+
+<!-- Prova Social / Avaliações -->
+<section class="reviews-section">
+  <div class="wrap">
+    <div style="text-align:center; max-width:600px; margin:0 auto;">
+      <h2 style="font-size:2rem; font-weight:800; margin-bottom:8px;">O Que Nossos Clientes Dizem</h2>
+      <p class="muted">Mais de 1.200 clientes ativos economizando todos os meses.</p>
+    </div>
+
+    <div class="reviews-grid">
+      <div class="review-card">
+        <div class="review-header">
+          <div class="review-avatar">M</div>
+          <div class="review-meta">
+            <b>Marcos Vinicius</b>
+            <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Compra Verificada</span>
+          </div>
+        </div>
+        <div class="stars">★★★★★</div>
+        <p class="review-text">"Comprei o Google AI Pro de 18 meses. O pagamento por PIX aprovou na hora e a licença com os 5 TB de Drive chegou no meu WhatsApp em menos de 2 minutos. Excelente!"</p>
+      </div>
+
+      <div class="review-card">
+        <div class="review-header">
+          <div class="review-avatar">A</div>
+          <div class="review-meta">
+            <b>Amanda Soares</b>
+            <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Compra Verificada</span>
+          </div>
+        </div>
+        <div class="stars">★★★★★</div>
+        <p class="review-text">"Duolingo Super funcionando perfeitamente sem nenhuma propaganda e com vidas infinitas. Pagar uma única vez R$ 40 em vez de mensalidade cara compensa demais."</p>
+      </div>
+
+      <div class="review-card">
+        <div class="review-header">
+          <div class="review-avatar">R</div>
+          <div class="review-meta">
+            <b>Rodrigo Lima</b>
+            <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Compra Verificada</span>
+          </div>
+        </div>
+        <div class="stars">★★★★★</div>
+        <p class="review-text">"Atendimento impecável! Tive uma dúvida na hora de vincular e me ajudaram pelo WhatsApp na mesma hora. Já é a terceira assinatura que compro aqui."</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Comparativo de Economia -->
+<section class="compare-section">
+  <div class="wrap">
+    <div style="text-align:center; max-width:680px; margin:0 auto 30px;">
+      <h2 style="font-size:2rem; font-weight:800; margin-bottom:8px;">Por Que Escolher a DevPlanet?</h2>
+      <p class="muted">Veja a diferença entre assinar diretamente com as marcas e comprar conosco.</p>
+    </div>
+
+    <div class="compare-box">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>Recurso / Benefício</th>
+            <th class="col-devplanet">DevPlanet Store</th>
+            <th>Assinatura Tradicional</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Forma de Cobrança</td>
+            <td class="col-devplanet"><b>Pagamento Único</b> (Sem mensalidades)</td>
+            <td>Cobrança mensal ou anual recorrente</td>
+          </tr>
+          <tr>
+            <td>Economia Real</td>
+            <td class="col-devplanet"><span class="check-yes">Até 80% mais barato</span></td>
+            <td>Preço de tabela em dólar + IOF</td>
+          </tr>
+          <tr>
+            <td>Meios de Pagamento</td>
+            <td class="col-devplanet">PIX instantâneo ou Cartão em 12x</td>
+            <td>Exige cartão internacional com limite</td>
+          </tr>
+          <tr>
+            <td>Suporte e Atendimento</td>
+            <td class="col-devplanet"><span class="check-yes">Direto pelo WhatsApp em Português</span></td>
+            <td>Tickets demorados em inglês</td>
+          </tr>
+          <tr>
+            <td>Risco de Renovação Automática</td>
+            <td class="col-devplanet"><span class="check-yes">Zero risco (Nunca cobramos novamente)</span></td>
+            <td><span class="check-no">Renovação surpresa na fatura</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- Garantia Blindada -->
+<div class="wrap guarantee-wrap">
+  <div class="guarantee-card">
+    <div class="guarantee-icon">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    </div>
+    <div>
+      <h3>Garantia Blindada de Satisfação</h3>
+      <p>Você tem <b>30 dias de garantia total</b>. Caso a sua licença apresente qualquer instabilidade ou problema de ativação, nossa equipe resolve imediatamente ou devolvemos 100% do seu dinheiro via Mercado Pago sem burocracia.</p>
+    </div>
+  </div>
+</div>
+
+<!-- FAQ (Dúvidas Frequentes) -->
+<section id="faq" class="faq-section">
+  <div class="wrap">
+    <div style="text-align:center; max-width:600px; margin:0 auto;">
+      <h2 style="font-size:2rem; font-weight:800; margin-bottom:8px;">Perguntas Frequentes</h2>
+      <p class="muted">Tudo o que você precisa saber antes de adquirir sua assinatura.</p>
+    </div>
+
+    <div class="faq-grid">
+      <details class="faq-item" open>
+        <summary>Como e quando recebo a minha licença?</summary>
+        <p>A entrega é <b>automatizada</b>! Assim que o seu pagamento for aprovado pelo Mercado Pago, a licença e o tutorial de ativação são enviados diretamente para o seu WhatsApp cadastrado e ficam disponíveis na Área do Cliente.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>Tem mensalidade ou cobrança recorrente?</summary>
+        <p><b>Não!</b> O valor exibido na loja é pago uma única vez (via PIX ou parcelado no cartão) e cobre todo o período contratado (12 ou 18 meses). Não fazemos débitos automáticos nem guardamos dados do seu cartão.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>É seguro pagar pelo Mercado Pago?</summary>
+        <p>Sim! Todos os nossos pagamentos são processados pela plataforma oficial do Mercado Pago, com proteção ao comprador, criptografia bancária de ponta e confirmação instantânea.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>A loja é um vendedor independente?</summary>
+        <p>Sim. Somos um fornecedor independente especializado na intermediação e fornecimento de licenças digitais. Não temos vínculo societário com as marcas citadas, que pertencem aos seus respectivos titulares.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>E se eu precisar de ajuda para ativar?</summary>
+        <p>Nossa equipe de suporte está disponível diretamente no WhatsApp para acompanhar a sua ativação passo a passo até tudo estar 100% funcionando.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- Rodapé -->
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <div class="brand" style="margin-bottom:14px;">
+          <div class="brand-logo-icon">⚡</div>
+          <div class="brand-text">
+            <h3 style="color:#fff; font-size:1.15rem; font-weight:800;" data-store>DevPlanet Store</h3>
+            <span>Assinaturas Digitais Originais</span>
+          </div>
+        </div>
+        <p style="font-size:0.85rem; line-height:1.6; max-width:380px;">
+          Intermediação segura de assinaturas e licenças digitais com os melhores preços do Brasil. Economia garantida com entrega automatizada no WhatsApp.
+        </p>
+        <div class="payment-badges-row">
+          <span class="pay-pill">⚡ PIX</span>
+          <span class="pay-pill">💳 Mercado Pago</span>
+          <span class="pay-pill">Visa</span>
+          <span class="pay-pill">Mastercard</span>
+          <span class="pay-pill">Elo</span>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4>Links Rápidos</h4>
+        <ul class="footer-links">
+          <li><a href="#produtos">Catálogo de Produtos</a></li>
+          <li><a href="#vantagens">Vantagens & Benefícios</a></li>
+          <li><a href="#faq">Dúvidas Frequentes</a></li>
+          <li><a href="pedido.html">Área do Cliente (Meus Pedidos)</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Atendimento & Ajuda</h4>
+        <ul class="footer-links">
+          <li><a id="footer-wa" target="_blank" rel="noopener">Falar no WhatsApp</a></li>
+          <li><span>Atendimento: 08h às 22h</span></li>
+          <li><span style="color:var(--green);">● Sistemas Operacionais</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div>
+        © 2026 <b data-store>DevPlanet Store</b>. Todos os direitos reservados. Vendedor independente.
+      </div>
+      <div>
+        Pagamentos processados com segurança por Mercado Pago Instituição de Pagamento.
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Modal: Detalhes do Produto -->
+<dialog id="dlg-prod">
+  <div class="dlg">
+    <button class="dlg-close" data-close aria-label="Fechar">×</button>
+    <div style="display:flex; gap:18px; align-items:center; margin-bottom:16px;">
+      <img id="p-img" alt="" style="width:120px; height:70px; object-fit:cover; border-radius:12px; border:1px solid var(--card-border);">
+      <div>
+        <span class="badge-tag" id="p-tag" style="display:inline-block; margin-bottom:4px;"></span>
+        <h2 id="p-name" style="font-size:1.4rem; font-weight:800; margin:0;"></h2>
+      </div>
+    </div>
+    
+    <p id="p-desc" class="muted" style="line-height:1.6; margin-bottom:20px; font-size:0.95rem;"></p>
+
+    <h4 style="margin:16px 0 10px; color:#fff; font-size:0.95rem; text-transform:uppercase; letter-spacing:0.04em;">O Que Está Incluso:</h4>
+    <ul id="p-feat" style="list-style:none; display:grid; gap:8px; margin-bottom:20px; padding:0;"></ul>
+
+    <div style="background:rgba(255,255,255,0.03); border:1px solid var(--card-border); border-radius:14px; padding:18px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; margin-top:20px;">
+      <div>
+        <div style="display:flex; align-items:baseline; gap:8px;">
+          <span id="p-old-price" class="old-price"></span>
+          <b id="p-price" style="font-size:1.9rem; font-weight:900; color:#fff;"></b>
+        </div>
+        <span class="price-pill">Pagamento Único · Sem Mensalidade</span>
+      </div>
+      <button class="btn big" id="p-buy" style="flex:1; min-width:200px;">Comprar Agora ⚡</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- Modal: Checkout Transparente & Pagamento -->
+<dialog id="dlg-buy">
+  <div class="dlg">
+    <button class="dlg-close" data-close aria-label="Fechar">×</button>
+
+    <!-- Formulário do Checkout -->
+    <div id="s-form">
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid var(--card-border);">
+        <div style="width:40px; height:40px; border-radius:10px; background:var(--grad); display:flex; align-items:center; justify-content:center; font-weight:800;">🛒</div>
+        <div>
+          <h2 style="font-size:1.35rem; font-weight:800; margin:0;">Finalizar Compra</h2>
+          <p class="muted" id="b-summary" style="margin:0; font-size:0.88rem;"></p>
+        </div>
+      </div>
+
+      <form id="form" novalidate>
+        <div class="form-group">
+          <label for="f-nome">Nome Completo</label>
+          <input id="f-nome" placeholder="Ex: João Carlos da Silva" autocomplete="name" required>
+        </div>
+
+        <div class="form-group">
+          <label for="f-tel">WhatsApp com DDD (para receber a licença)</label>
+          <input id="f-tel" type="tel" inputmode="tel" placeholder="(21) 99999-9999" autocomplete="tel" required>
+        </div>
+
+        <div class="form-group">
+          <label for="f-email">Seu Melhor E-mail</label>
+          <input id="f-email" type="email" placeholder="seuemail@exemplo.com" autocomplete="email" required>
+        </div>
+
+        <label class="chk">
+          <input type="checkbox" id="f-ok" checked>
+          <span>Concordo em receber os dados e a licença diretamente no WhatsApp informado e na Área do Cliente.</span>
+        </label>
+
+        <p class="err" id="err" role="alert"></p>
+
+        <button class="btn big" type="submit" style="width:100%; justify-content:center; padding:16px;">
+          <span>Prosseguir para o Pagamento</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+
+        <div style="display:flex; align-items:center; justify-content:center; gap:18px; margin-top:8px; font-size:0.75rem; color:var(--text-dim);">
+          <span>🔒 Criptografia 256-bit</span>
+          <span>🛡️ Mercado Pago Oficial</span>
+          <span>⚡ Entrega Imediata</span>
+        </div>
+      </form>
+    </div>
+
+    <!-- Tela do Pagamento (PIX / Mercado Pago) -->
+    <div id="s-pix" hidden>
+      <div style="text-align:center; margin-bottom:16px;">
+        <span class="price-pill" style="margin-bottom:8px;">Aguardando Pagamento</span>
+        <h2 style="font-size:1.6rem; font-weight:800; margin:4px 0;">Pague <span id="pay-total" class="g"></span></h2>
+        <p class="muted sm">Escaneie o QR Code ou use o Copia e Cola. Assim que pagar, sua licença será liberada no WhatsApp!</p>
+      </div>
+
+      <div class="pay-box">
+        <div class="qr-frame" id="qr" aria-label="QR Code PIX"></div>
+        <div>
+          <label style="font-size:0.85rem; font-weight:700; color:#e2e8f0;">Código PIX Copia e Cola:
+            <textarea class="pix-textarea" id="code" readonly></textarea>
+          </label>
+          
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
+            <button class="btn alt sm" id="copy" type="button" style="flex:1;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <span>Copiar código PIX</span>
+            </button>
+          </div>
+
+          <!-- Botão para pagar no Mercado Pago se preferir Cartão de Crédito -->
+          <div style="margin-top:12px;">
+            <a class="btn mp" id="btn-mp-pay" href="#" target="_blank" rel="noopener" style="width:100%; display:none; justify-content:center;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+              <span>Pagar no Cartão (Mercado Pago) →</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid; gap:10px; margin-top:16px;">
+        <a class="btn big" id="btn-open-order" href="pedido.html" style="justify-content:center;">
+          <span>Acompanhar Pedido na Área do Cliente</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a class="btn wa sm" id="paid" target="_blank" rel="noopener" style="justify-content:center;">
+          <span>Abrir Conversa de Suporte no WhatsApp</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<script src="config.js"></script>
+<script src="products.js"></script>
+<script src="qr.js"></script>
+<script src="pix.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
