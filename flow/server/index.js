@@ -284,6 +284,7 @@ eco.post('/checkout', async (req, res) => {
                 surname: name.trim().split(' ').slice(1).join(' ') || 'Cliente',
                 email: email.trim().toLowerCase()
               },
+              statement_descriptor: 'DEVPLANET',
               external_reference: orderId,
               ...(publicUrl && publicUrl.startsWith('https://') ? {
                 back_urls: {
@@ -313,6 +314,7 @@ eco.post('/checkout', async (req, res) => {
           transaction_amount: Number(amount),
           description: productName || 'Assinatura Digital',
           payment_method_id: 'pix',
+          statement_descriptor: 'DEVPLANET',
           payer: {
             email: email.trim().toLowerCase(),
             first_name: name.trim().split(' ')[0],
