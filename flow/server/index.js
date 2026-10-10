@@ -238,7 +238,7 @@ const eco = express.Router();
 // 1. Criar Checkout / Pagamento PIX Mercado Pago
 eco.post('/checkout', async (req, res) => {
   try {
-    const { name, email, phone, productId, productName, amount } = req.body || {};
+    const { name, email, phone, productId, productName, amount, paymentMethod } = req.body || {};
     if (!name || !email || !productId || !amount) {
       return res.status(400).json({ error: 'Dados incompletos para o checkout.' });
     }
@@ -354,12 +354,12 @@ eco.post('/checkout', async (req, res) => {
       INSERT INTO ecommerce_orders (
         id, access_token, product_id, product_name, amount,
         customer_name, customer_email, customer_phone,
-        payment_id, status, qr_code, qr_code_base64, ticket_url
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        payment_method, payment_id, status, qr_code, qr_code_base64, ticket_url
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       orderId, accessToken, productId, productName || productId, Number(amount),
       name.trim(), email.trim().toLowerCase(), phone ? phone.replace(/\D/g, '') : '',
-      paymentId, paymentStatus, qrCode, qrCodeBase64, ticketUrl
+      paymentMethod || 'pix', paymentId, paymentStatus, qrCode, qrCodeBase64, ticketUrl
     );
 
     res.json({

@@ -8,6 +8,7 @@ let current = PRODUCTS[0];
 let order = null;
 let activeCategory = "all";
 let orderPollInterval = null;
+let selectedPaymentMethod = "pix";
 
 // Configurações e Títulos da Loja
 document.title = `${CONFIG.storeName} — Licenças e Assinaturas com até 80% OFF`;
@@ -55,6 +56,11 @@ function renderCatalog() {
       </li>
     `).join("");
 
+    const creditPrice = p.creditPrice || p.price;
+    const creditText = creditPrice !== p.price 
+      ? `ou <b>${brl(creditPrice)}</b> em até 12x no cartão`
+      : `ou em até 12x no cartão`;
+
     return `
       <article class="product-card">
         <div class="card-media">
@@ -81,11 +87,14 @@ function renderCatalog() {
           <div class="card-pricing">
             <div class="price-row">
               ${oldPriceHtml}
-              <b class="current-price">${brl(p.price)}</b>
+              <div class="price-main-block">
+                <b class="current-price">${brl(p.price)}</b>
+                <span class="price-badge-pix">no PIX</span>
+              </div>
             </div>
-            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px;">
-              <span class="price-pill">Pagamento Único</span>
-              <span class="price-sub">ou até 12x no cartão</span>
+            <div class="price-sub-row">
+              <span class="price-credit-text">${creditText}</span>
+              <span class="price-pill-single">Sem Mensalidade</span>
             </div>
           </div>
 
@@ -150,7 +159,15 @@ function openProduct(id) {
   $("#p-name").textContent = current.name;
   $("#p-desc").textContent = current.description;
   $("#p-old-price").textContent = current.originalPrice ? brl(current.originalPrice) : "";
-  $("#p-price").textContent = brl(current.price);
+  $("#p-price").innerHTML = `${brl(current.price)} <small style="font-size:0.85rem; color:#4ade80; font-weight:800; text-transform:uppercase;">no PIX</small>`;
+  
+  const creditPrice = current.creditPrice || current.price;
+  const pCreditEl = $("#p-credit-price");
+  if (pCreditEl) {
+    pCreditEl.innerHTML = creditPrice !== current.price 
+      ? `ou <b>${brl(creditPrice)}</b> no cartão de crédito em até 12x`
+      : `ou em até 12x no cartão de crédito sem juros`;
+  }
 
   $("#p-feat").innerHTML = current.features.map(([t, d]) => `
     <li style="background:rgba(255,255,255,0.03); border:1px solid var(--card-border); border-radius:10px; padding:10px 14px;">
@@ -167,13 +184,74 @@ $("#p-buy").onclick = () => {
   startCheckout(current);
 };
 
+// Atualiza o estado da seleção de forma de pagamento no checkout
+function updatePaymentMethodUI() {
+  const pixPrice = current.price;
+  const cardPrice = current.creditPrice || current.price;
+
+  if ($("#pix-method-price")) $("#pix-method-price").textContent = brl(pixPrice);
+  if ($("#card-method-price")) $("#card-method-price").textContent = brl(cardPrice);
+
+  const activeAmount = (selectedPaymentMethod === "credit_card") ? cardPrice : pixPrice;
+  const methodLabel = (selectedPaymentMethod === "credit_card") ? "Cartão de Crédito" : "PIX à vista";
+
+  if ($("#b-summary")) {
+    $("#b-summary").textContent = `${current.name} · ${brl(activeAmount)} (${methodLabel})`;
+  }
+
+  const btnSubmitText = $("#btn-submit-text");
+  if (btnSubmitText) {
+    btnSubmitText.textContent = selectedPaymentMethod === "credit_card"
+      ? `Pagar ${brl(activeAmount)} no Cartão (Mercado Pago) 💳`
+      : `Pagar ${brl(activeAmount)} no PIX ⚡`;
+  }
+
+  if ($("#opt-pix-wrap")) {
+    $("#opt-pix-wrap").classList.toggle("active", selectedPaymentMethod === "pix");
+  }
+  if ($("#opt-card-wrap")) {
+    $("#opt-card-wrap").classList.toggle("active", selectedPaymentMethod === "credit_card");
+  }
+}
+
+// Event listeners nos seletores de pagamento
+function setupPaymentSelectorListeners() {
+  const optPix = $("#opt-pix");
+  const optCard = $("#opt-card");
+
+  if (optPix) {
+    optPix.addEventListener("change", () => {
+      if (optPix.checked) {
+        selectedPaymentMethod = "pix";
+        updatePaymentMethodUI();
+      }
+    });
+  }
+
+  if (optCard) {
+    optCard.addEventListener("change", () => {
+      if (optCard.checked) {
+        selectedPaymentMethod = "credit_card";
+        updatePaymentMethodUI();
+      }
+    });
+  }
+}
+setupPaymentSelectorListeners();
+
 // Iniciar Checkout
 function startCheckout(prod) {
   current = prod;
+  selectedPaymentMethod = "pix";
+
+  if ($("#opt-pix")) $("#opt-pix").checked = true;
+  if ($("#opt-card")) $("#opt-card").checked = false;
+
   $("#s-form").hidden = false;
   $("#s-pix").hidden = true;
   $("#err").textContent = "";
-  $("#b-summary").textContent = `${prod.name} · ${brl(prod.price)} (Pagamento único sem mensalidade)`;
+
+  updatePaymentMethodUI();
   dlg.buy.showModal();
 }
 
@@ -191,9 +269,14 @@ $("#form").onsubmit = async e => {
   if (!$("#f-ok").checked) return fail("É necessário concordar com as condições de entrega.");
   fail("");
 
-  const btn = $("#form button[type=submit]");
+  const activeAmount = (selectedPaymentMethod === "credit_card")
+    ? (current.creditPrice || current.price)
+    : current.price;
+
+  const btn = $("#btn-submit-order");
+  const btnText = $("#btn-submit-text");
   btn.disabled = true;
-  btn.innerHTML = `<span>Gerando cobrança no Mercado Pago...</span>`;
+  btnText.textContent = "Processando no Mercado Pago...";
 
   const apiBase = (typeof CONFIG !== 'undefined' && CONFIG.flowApi) ? CONFIG.flowApi.replace(/\/$/, "") : window.location.origin;
 
@@ -213,7 +296,8 @@ $("#form").onsubmit = async e => {
         phone,
         productId: current.id,
         productName: current.name,
-        amount: current.price
+        amount: activeAmount,
+        paymentMethod: selectedPaymentMethod
       })
     });
 
@@ -226,50 +310,64 @@ $("#form").onsubmit = async e => {
       ticketUrl = data.ticketUrl || data.checkoutUrl || "";
     }
   } catch (err) {
-    console.warn("Backend offline, gerando código PIX padrão:", err);
+    console.warn("Backend offline, gerando código de pagamento local:", err);
   }
 
   // Fallback se não recebeu código PIX da API
-  if (!code && typeof pixPayload === "function") {
-    code = pixPayload({ key: CONFIG.pixKey, name: CONFIG.pixName, city: CONFIG.pixCity, amount: current.price, txid: orderId });
+  if (!code && typeof pixPayload === "function" && selectedPaymentMethod === "pix") {
+    code = pixPayload({ key: CONFIG.pixKey, name: CONFIG.pixName, city: CONFIG.pixCity, amount: activeAmount, txid: orderId });
   }
 
-  order = { ref: orderId, name, email, phone, product: current.name, total: current.price };
+  order = { ref: orderId, name, email, phone, product: current.name, total: activeAmount };
 
   btn.disabled = false;
-  btn.innerHTML = `<span>Prosseguir para o Pagamento</span>`;
+  btnText.textContent = "Prosseguir para o Pagamento";
 
-  // Exibir QR Code
-  const qrEl = $("#qr");
-  if (qrBase64) {
-    qrEl.innerHTML = `<img src="data:image/png;base64,${qrBase64}" style="width:100%;height:100%;object-fit:contain;" alt="QR Code PIX">`;
-  } else if (typeof QR !== 'undefined' && code) {
-    qrEl.innerHTML = QR.svg(code);
-  } else {
-    qrEl.textContent = "QR Code Gerado";
-  }
-
-  $("#code").value = code;
-  $("#pay-total").textContent = brl(current.price);
+  $("#pay-total").textContent = brl(activeAmount);
 
   const orderUrl = `pedido.html?id=${encodeURIComponent(orderId)}${accessToken ? `&token=${encodeURIComponent(accessToken)}` : ''}`;
   const btnOrder = $("#btn-open-order");
   if (btnOrder) btnOrder.href = orderUrl;
 
-  // Botão de pagar no Mercado Pago (Cartão de Crédito)
-  const btnMp = $("#btn-mp-pay");
-  if (btnMp) {
-    if (ticketUrl && ticketUrl.includes("mercadopago")) {
-      btnMp.href = ticketUrl;
-      btnMp.style.display = "inline-flex";
-    } else {
-      btnMp.style.display = "none";
+  const boxPix = $("#box-pix-content");
+  const boxCard = $("#box-card-content");
+  const subMsg = $("#pay-sub-msg");
+  const statusPill = $("#pay-status-pill");
+
+  if (selectedPaymentMethod === "credit_card") {
+    // Modo Cartão de Crédito
+    if (boxPix) boxPix.hidden = true;
+    if (boxCard) boxCard.hidden = false;
+    if (subMsg) subMsg.textContent = `Cobrança de ${brl(activeAmount)} gerada no Mercado Pago. Parcele em até 12x no cartão!`;
+    if (statusPill) statusPill.textContent = "Aguardando Pagamento no Cartão";
+
+    const btnDirectCard = $("#btn-mp-pay-direct");
+    if (btnDirectCard && ticketUrl) {
+      btnDirectCard.href = ticketUrl;
+      // Abre a aba do Mercado Pago automaticamente para comodidade do usuário
+      try { window.open(ticketUrl, "_blank"); } catch {}
     }
+  } else {
+    // Modo PIX
+    if (boxPix) boxPix.hidden = false;
+    if (boxCard) boxCard.hidden = true;
+    if (subMsg) subMsg.textContent = "Escaneie o QR Code ou use o Copia e Cola. Assim que pagar, sua licença será liberada no WhatsApp!";
+    if (statusPill) statusPill.textContent = "Aguardando Pagamento PIX";
+
+    const qrEl = $("#qr");
+    if (qrBase64) {
+      qrEl.innerHTML = `<img src="data:image/png;base64,${qrBase64}" style="width:100%;height:100%;object-fit:contain;" alt="QR Code PIX">`;
+    } else if (typeof QR !== 'undefined' && code) {
+      qrEl.innerHTML = QR.svg(code);
+    } else {
+      qrEl.textContent = "QR Code Gerado";
+    }
+    $("#code").value = code;
   }
 
   $("#paid").href = wa(
     `Olá! Acabei de fazer um pedido na loja.\n\n` +
-    `Produto: ${current.name} (${brl(current.price)})\n` +
+    `Produto: ${current.name} (${brl(activeAmount)} via ${selectedPaymentMethod === 'credit_card' ? 'Cartão' : 'PIX'})\n` +
     `Pedido: ${orderId}\n` +
     `Nome: ${name}\n` +
     `Acompanhamento: ${window.location.origin}/${orderUrl}`

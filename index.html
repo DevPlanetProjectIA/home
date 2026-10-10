@@ -379,6 +379,7 @@
           <span id="p-old-price" class="old-price"></span>
           <b id="p-price" style="font-size:1.9rem; font-weight:900; color:#fff;"></b>
         </div>
+        <div id="p-credit-price" style="font-size:0.85rem; color:#94a3b8; margin:4px 0 6px; font-weight:600;"></div>
         <span class="price-pill">Pagamento Único · Sem Mensalidade</span>
       </div>
       <button class="btn big" id="p-buy" style="flex:1; min-width:200px;">Comprar Agora ⚡</button>
@@ -401,7 +402,33 @@
         </div>
       </div>
 
-      <form id="form" novalidate>
+        <div class="form-group">
+          <label>Forma de Pagamento:</label>
+          <div class="payment-method-selector">
+            <label class="pay-method-card active" id="opt-pix-wrap">
+              <input type="radio" name="pay_method" id="opt-pix" value="pix" checked>
+              <div class="pay-method-info">
+                <div class="pay-method-title">
+                  <span class="pay-method-badge-pix">⚡ PIX à Vista</span>
+                  <b class="pay-method-price" id="pix-method-price">R$ 50,00</b>
+                </div>
+                <span class="pay-method-sub">Aprovação imediata e envio automático</span>
+              </div>
+            </label>
+
+            <label class="pay-method-card" id="opt-card-wrap">
+              <input type="radio" name="pay_method" id="opt-card" value="credit_card">
+              <div class="pay-method-info">
+                <div class="pay-method-title">
+                  <span class="pay-method-badge-card">💳 Cartão de Crédito</span>
+                  <b class="pay-method-price" id="card-method-price">R$ 55,00</b>
+                </div>
+                <span class="pay-method-sub">Em até 12x via Mercado Pago Oficial</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
         <div class="form-group">
           <label for="f-nome">Nome Completo</label>
           <input id="f-nome" placeholder="Ex: João Carlos da Silva" autocomplete="name" required>
@@ -424,8 +451,8 @@
 
         <p class="err" id="err" role="alert"></p>
 
-        <button class="btn big" type="submit" style="width:100%; justify-content:center; padding:16px;">
-          <span>Prosseguir para o Pagamento</span>
+        <button class="btn big" id="btn-submit-order" type="submit" style="width:100%; justify-content:center; padding:16px;">
+          <span id="btn-submit-text">Prosseguir para o Pagamento</span>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </button>
 
@@ -440,12 +467,13 @@
     <!-- Tela do Pagamento (PIX / Mercado Pago) -->
     <div id="s-pix" hidden>
       <div style="text-align:center; margin-bottom:16px;">
-        <span class="price-pill" style="margin-bottom:8px;">Aguardando Pagamento</span>
+        <span class="price-pill" id="pay-status-pill" style="margin-bottom:8px;">Aguardando Pagamento</span>
         <h2 style="font-size:1.6rem; font-weight:800; margin:4px 0;">Pague <span id="pay-total" class="g"></span></h2>
-        <p class="muted sm">Escaneie o QR Code ou use o Copia e Cola. Assim que pagar, sua licença será liberada no WhatsApp!</p>
+        <p class="muted sm" id="pay-sub-msg">Escaneie o QR Code ou use o Copia e Cola. Assim que pagar, sua licença será liberada no WhatsApp!</p>
       </div>
 
-      <div class="pay-box">
+      <!-- Container do PIX -->
+      <div class="pay-box" id="box-pix-content">
         <div class="qr-frame" id="qr" aria-label="QR Code PIX"></div>
         <div>
           <label style="font-size:0.85rem; font-weight:700; color:#e2e8f0;">Código PIX Copia e Cola:
@@ -458,15 +486,17 @@
               <span>Copiar código PIX</span>
             </button>
           </div>
-
-          <!-- Botão para pagar no Mercado Pago se preferir Cartão de Crédito -->
-          <div style="margin-top:12px;">
-            <a class="btn mp" id="btn-mp-pay" href="#" target="_blank" rel="noopener" style="width:100%; display:none; justify-content:center;">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-              <span>Pagar no Cartão (Mercado Pago) →</span>
-            </a>
-          </div>
         </div>
+      </div>
+
+      <!-- Container do Cartão de Crédito Mercado Pago -->
+      <div id="box-card-content" style="background:rgba(0,0,0,0.25); border:1px solid var(--card-border); border-radius:14px; padding:22px; text-align:center; margin:16px 0;" hidden>
+        <div style="width:48px; height:48px; border-radius:50%; background:rgba(0, 158, 227, 0.15); color:#009ee3; display:flex; align-items:center; justify-content:center; margin:0 auto 12px; font-size:1.4rem;">💳</div>
+        <h3 style="color:#fff; font-size:1.2rem; font-weight:800; margin-bottom:6px;">Pagar via Cartão no Mercado Pago</h3>
+        <p class="muted sm" style="margin-bottom:18px;">Clique abaixo para ser redirecionado com segurança para o Mercado Pago e parcelar em até 12x.</p>
+        <a class="btn mp big" id="btn-mp-pay-direct" href="#" target="_blank" rel="noopener" style="width:100%; justify-content:center;">
+          <span>Abrir Mercado Pago Seguro (Até 12x) →</span>
+        </a>
       </div>
 
       <div style="display:grid; gap:10px; margin-top:16px;">

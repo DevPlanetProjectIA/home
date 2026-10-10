@@ -1,19 +1,136 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif">
-<defs><linearGradient id="d" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1fa84f"/><stop offset=".6" stop-color="#58cc02"/><stop offset="1" stop-color="#b6e63a"/></linearGradient></defs>
-<rect width="640" height="360" fill="url(#d)"/>
-<circle cx="570" cy="40" r="150" fill="#fff" opacity=".1"/><circle cx="60" cy="340" r="110" fill="#fff" opacity=".1"/>
-<text x="40" y="70" fill="#fff" opacity=".95" font-size="22" font-weight="700" letter-spacing="3">PLANO DE</text>
-<text x="40" y="150" fill="#fff" font-size="82" font-weight="900">12 MESES</text>
-<text x="40" y="198" fill="#fff" font-size="28" font-weight="800">Aprenda idiomas no seu ritmo</text>
-<g font-weight="800" font-size="22" text-anchor="middle">
-<g transform="rotate(-6 540 70)"><rect x="480" y="42" width="120" height="52" rx="18" fill="#fff"/><path d="M510 94l-6 16 20-16z" fill="#fff"/><text x="540" y="76" fill="#1fa84f">Hello!</text></g>
-<g transform="rotate(5 550 150)"><rect x="490" y="124" width="120" height="52" rx="18" fill="#fff"/><path d="M580 176l8 14-22-14z" fill="#fff"/><text x="550" y="158" fill="#f08a00">¡Hola!</text></g>
-<g transform="rotate(-3 530 235)"><rect x="470" y="208" width="120" height="52" rx="18" fill="#fff"/><text x="530" y="242" fill="#8b3cf7">Ciao!</text></g>
-</g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgDuo" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#08140c" />
+      <stop offset="60%" stop-color="#0f2416" />
+      <stop offset="100%" stop-color="#051008" />
+    </linearGradient>
 
-<rect x="40" y="250" width="200" height="86" rx="22" fill="#fff"/>
-<text x="140" y="302" fill="#1fa84f" font-size="48" font-weight="900" text-anchor="middle">R$ 40</text>
-<text x="140" y="326" fill="#5d6380" font-size="14" font-weight="700" text-anchor="middle">PAGAMENTO ÚNICO</text>
-<rect x="260" y="276" width="250" height="38" rx="19" fill="#fff" opacity=".95"/>
-<text x="385" y="301" fill="#10142b" font-size="18" font-weight="800" text-anchor="middle">SEM MENSALIDADE</text>
+    <!-- Super Duolingo Neon Gradient -->
+    <linearGradient id="duoNeon" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#58cc02" />
+      <stop offset="50%" stop-color="#22c55e" />
+      <stop offset="100%" stop-color="#84cc16" />
+    </linearGradient>
+
+    <!-- Super Duolingo Gold Accents -->
+    <linearGradient id="superGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="50%" stop-color="#facc15" />
+      <stop offset="100%" stop-color="#eab308" />
+    </linearGradient>
+
+    <radialGradient id="duoAura" cx="75%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#58cc02" stop-opacity="0.35" />
+      <stop offset="60%" stop-color="#22c55e" stop-opacity="0.1" />
+      <stop offset="100%" stop-color="#08140c" stop-opacity="0" />
+    </radialGradient>
+
+    <filter id="duoShadow">
+      <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#000" flood-opacity="0.65" />
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="640" height="360" fill="url(#bgDuo)" />
+  <rect width="640" height="360" fill="url(#duoAura)" />
+
+  <!-- Subtle Speed Grid -->
+  <g stroke="rgba(255, 255, 255, 0.03)" stroke-width="1">
+    <line x1="0" y1="90" x2="640" y2="90" />
+    <line x1="0" y1="180" x2="640" y2="180" />
+    <line x1="0" y1="270" x2="640" y2="270" />
+    <line x1="160" y1="0" x2="160" y2="360" />
+    <line x1="320" y1="0" x2="320" y2="360" />
+    <line x1="480" y1="0" x2="480" y2="360" />
+  </g>
+
+  <!-- Right Section: Super Duolingo Owl Mascot & Shield -->
+  <g transform="translate(425, 52)" filter="url(#duoShadow)">
+    <!-- Outer Glow Ring -->
+    <circle cx="95" cy="112" r="110" fill="url(#duoNeon)" opacity="0.12" />
+    <circle cx="95" cy="112" r="88" fill="#112918" stroke="url(#duoNeon)" stroke-width="3" />
+
+    <!-- Duolingo Owl "Duo" Authentic Head Stylization -->
+    <g transform="translate(95, 102)">
+      <!-- Body / Head Shape -->
+      <ellipse cx="0" cy="5" rx="54" ry="46" fill="#58cc02" />
+      <ellipse cx="0" cy="22" rx="38" ry="24" fill="#78d826" />
+
+      <!-- Left Eye -->
+      <ellipse cx="-20" cy="-2" rx="20" ry="22" fill="#ffffff" />
+      <ellipse cx="-16" cy="-1" rx="10" ry="11" fill="#4b4b4b" />
+      <circle cx="-13" cy="-4" r="4" fill="#ffffff" />
+
+      <!-- Right Eye -->
+      <ellipse cx="20" cy="-2" rx="20" ry="22" fill="#ffffff" />
+      <ellipse cx="16" cy="-1" rx="10" ry="11" fill="#4b4b4b" />
+      <circle cx="19" cy="-4" r="4" fill="#ffffff" />
+
+      <!-- Beak -->
+      <polygon points="0,6 -10,21 10,21" fill="#ff9600" />
+
+      <!-- Super Star on Forehead -->
+      <polygon points="0,-42 4,-30 16,-30 7,-22 10,-10 0,-18 -10,-10 -7,-22 -16,-30 -4,-30" fill="url(#superGold)" />
+    </g>
+
+    <!-- Super Official Pill -->
+    <g transform="translate(45, 160)">
+      <rect width="100" height="30" rx="15" fill="url(#duoNeon)" />
+      <text x="50" y="20" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="13" font-weight="900" fill="#051a09" text-anchor="middle" letter-spacing="1.5">SUPER</text>
+    </g>
+  </g>
+
+  <!-- Left Content Area -->
+  <g transform="translate(42, 42)">
+    <!-- Brand Pill -->
+    <g transform="translate(0, 0)">
+      <rect width="190" height="34" rx="17" fill="rgba(88, 204, 2, 0.12)" stroke="rgba(88, 204, 2, 0.35)" stroke-width="1" />
+      
+      <!-- Duo Green Dot -->
+      <circle cx="18" cy="17" r="8" fill="url(#duoNeon)" />
+      <text x="36" y="22" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="12" font-weight="800" fill="#86efac" letter-spacing="1">DUOLINGO OFICIAL</text>
+    </g>
+
+    <!-- Main Title -->
+    <text x="0" y="82" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="38" font-weight="900" fill="#58cc02" letter-spacing="-0.02em">
+      Duolingo Super
+    </text>
+    <text x="0" y="114" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="22" font-weight="700" fill="#94a3b8">
+      Assinatura Anual · 12 Meses
+    </text>
+
+    <!-- Features Grid -->
+    <g transform="translate(0, 140)">
+      <!-- Box 1: Vidas Infinitas -->
+      <g transform="translate(0, 0)">
+        <rect width="175" height="64" rx="14" fill="rgba(255, 255, 255, 0.05)" stroke="rgba(239, 68, 68, 0.35)" stroke-width="1.2" />
+        <text x="16" y="28" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="18" font-weight="900" fill="#ef4444">♥ ∞ VIDAS</text>
+        <text x="16" y="48" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="12" font-weight="600" fill="#cbd5e1">Erre sem interrupções</text>
+      </g>
+
+      <!-- Box 2: Zero Anúncios -->
+      <g transform="translate(187, 0)">
+        <rect width="180" height="64" rx="14" fill="rgba(255, 255, 255, 0.05)" stroke="rgba(88, 204, 2, 0.35)" stroke-width="1.2" />
+        <text x="16" y="28" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="18" font-weight="900" fill="#58cc02">ZERO ADS</text>
+        <text x="16" y="48" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="12" font-weight="600" fill="#cbd5e1">100% Foco no aprendizado</text>
+      </g>
+    </g>
+
+    <!-- Bottom Verification Checks -->
+    <g transform="translate(0, 235)">
+      <g transform="translate(0, 0)">
+        <circle cx="8" cy="8" r="6" fill="#58cc02" />
+        <polyline points="5,8 7,10 11,6" fill="none" stroke="#000" stroke-width="1.8" stroke-linecap="round" />
+        <text x="22" y="12" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="13" font-weight="700" fill="#e2e8f0">Revisão Personalizada de Erros</text>
+      </g>
+
+      <g transform="translate(235, 0)">
+        <circle cx="8" cy="8" r="6" fill="#58cc02" />
+        <polyline points="5,8 7,10 11,6" fill="none" stroke="#000" stroke-width="1.8" stroke-linecap="round" />
+        <text x="22" y="12" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="13" font-weight="700" fill="#e2e8f0">Ativação na sua Própria Conta</text>
+      </g>
+    </g>
+  </g>
 </svg>

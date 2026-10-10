@@ -1,13 +1,131 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif">
-<defs><linearGradient id="cg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7d2ae8"/><stop offset=".5" stop-color="#00c4cc"/><stop offset="1" stop-color="#2684ff"/></linearGradient></defs>
-<rect width="640" height="360" fill="url(#cg)"/>
-<circle cx="580" cy="50" r="160" fill="#fff" opacity=".1"/><circle cx="70" cy="320" r="130" fill="#fff" opacity=".1"/>
-<text x="40" y="70" fill="#fff" opacity=".95" font-size="22" font-weight="700" letter-spacing="3">PLANO ANUAL</text>
-<text x="40" y="150" fill="#fff" font-size="82" font-weight="900">12 MESES</text>
-<text x="40" y="198" fill="#fff" font-size="28" font-weight="800">Designs, Vídeos e Brand Kit Ilimitados</text>
-<rect x="40" y="250" width="220" height="86" rx="22" fill="#fff"/>
-<text x="150" y="302" fill="#7d2ae8" font-size="48" font-weight="900" text-anchor="middle">PRO</text>
-<text x="150" y="326" fill="#5d6380" font-size="14" font-weight="700" text-anchor="middle">ACESSO COMPLETO</text>
-<rect x="280" y="276" width="280" height="38" rx="19" fill="#fff" opacity=".95"/>
-<text x="420" y="301" fill="#10142b" font-size="16" font-weight="800" text-anchor="middle">ATIVAÇÃO NO SEU E-MAIL</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgCanva" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a1020" />
+      <stop offset="60%" stop-color="#121832" />
+      <stop offset="100%" stop-color="#181432" />
+    </linearGradient>
+
+    <!-- Canva Brand Gradient (Cyan to Purple) -->
+    <linearGradient id="canvaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00c4cc" />
+      <stop offset="50%" stop-color="#7d2ae8" />
+      <stop offset="100%" stop-color="#9a30eb" />
+    </linearGradient>
+
+    <!-- Gold Crown Gradient -->
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="45%" stop-color="#eab308" />
+      <stop offset="100%" stop-color="#ca8a04" />
+    </linearGradient>
+
+    <radialGradient id="canvaAura" cx="75%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#7d2ae8" stop-opacity="0.38" />
+      <stop offset="50%" stop-color="#00c4cc" stop-opacity="0.12" />
+      <stop offset="100%" stop-color="#0a1020" stop-opacity="0" />
+    </radialGradient>
+
+    <filter id="canvaShadow">
+      <feDropShadow dx="0" dy="6" stdDeviation="14" flood-color="#000" flood-opacity="0.6" />
+    </filter>
+  </defs>
+
+  <!-- Canvas Background -->
+  <rect width="640" height="360" fill="url(#bgCanva)" />
+  <rect width="640" height="360" fill="url(#canvaAura)" />
+
+  <!-- Subtle Designer Canvas Grid -->
+  <g stroke="rgba(255, 255, 255, 0.035)" stroke-width="1">
+    <line x1="0" y1="90" x2="640" y2="90" />
+    <line x1="0" y1="180" x2="640" y2="180" />
+    <line x1="0" y1="270" x2="640" y2="270" />
+    <line x1="160" y1="0" x2="160" y2="360" />
+    <line x1="320" y1="0" x2="320" y2="360" />
+    <line x1="480" y1="0" x2="480" y2="360" />
+  </g>
+
+  <!-- Right Section: Official Canva Pro Shield & Crown -->
+  <g transform="translate(425, 55)" filter="url(#canvaShadow)">
+    <!-- Outer Radiant Ring -->
+    <circle cx="95" cy="110" r="110" fill="url(#canvaGrad)" opacity="0.15" />
+    <circle cx="95" cy="110" r="88" fill="#131832" stroke="url(#canvaGrad)" stroke-width="3" />
+
+    <!-- Official Canva Golden Crown -->
+    <g transform="translate(95, 95)">
+      <!-- Crown Base & Spikes -->
+      <path d="M -42,20 L -30,-22 L -12,-4 L 0,-34 L 12,-4 L 30,-22 L 42,20 Z" fill="url(#goldGrad)" />
+      <!-- Bottom Band -->
+      <rect x="-42" y="22" width="84" height="10" rx="5" fill="url(#goldGrad)" />
+
+      <!-- Jewels -->
+      <circle cx="-30" cy="-25" r="4" fill="#ffffff" />
+      <circle cx="0" cy="-37" r="4.5" fill="#ffffff" />
+      <circle cx="30" cy="-25" r="4" fill="#ffffff" />
+      <circle cx="-12" cy="-6" r="3" fill="#ca8a04" />
+      <circle cx="12" cy="-6" r="3" fill="#ca8a04" />
+
+      <!-- Sparkling Glint -->
+      <polygon points="0,-45 2,-41 6,-41 3,-38 4,-34 0,-36 -4,-34 -3,-38 -6,-41 -2,-41" fill="#fff" />
+    </g>
+
+    <!-- PRO Official Pill -->
+    <g transform="translate(50, 160)">
+      <rect width="90" height="30" rx="15" fill="url(#goldGrad)" />
+      <text x="45" y="20" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="14" font-weight="900" fill="#000000" text-anchor="middle" letter-spacing="1.5">PRO</text>
+    </g>
+  </g>
+
+  <!-- Left Content Area -->
+  <g transform="translate(42, 42)">
+    <!-- Brand Pill with Official Canva Typography -->
+    <g transform="translate(0, 0)">
+      <rect width="180" height="34" rx="17" fill="rgba(0, 196, 204, 0.12)" stroke="rgba(0, 196, 204, 0.35)" stroke-width="1" />
+      
+      <!-- Canva Icon Dot -->
+      <circle cx="18" cy="17" r="8" fill="url(#canvaGrad)" />
+      <text x="36" y="22" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="12" font-weight="800" fill="#00c4cc" letter-spacing="1">CANVA OFICIAL</text>
+    </g>
+
+    <!-- Main Title -->
+    <text x="0" y="82" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="40" font-weight="900" fill="#ffffff" letter-spacing="-0.02em">
+      Canva Pro
+    </text>
+    <text x="0" y="114" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="22" font-weight="700" fill="#94a3b8">
+      Assinatura Anual · 12 Meses
+    </text>
+
+    <!-- Features Grid -->
+    <g transform="translate(0, 140)">
+      <!-- Box 1: Removedor de Fundo -->
+      <g transform="translate(0, 0)">
+        <rect width="175" height="64" rx="14" fill="rgba(255, 255, 255, 0.05)" stroke="rgba(0, 196, 204, 0.3)" stroke-width="1.2" />
+        <text x="16" y="28" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="18" font-weight="900" fill="#00c4cc">1-CLIQUE</text>
+        <text x="16" y="48" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="12" font-weight="600" fill="#cbd5e1">Removedor de Fundo IA</text>
+      </g>
+
+      <!-- Box 2: +100M Elementos -->
+      <g transform="translate(187, 0)">
+        <rect width="180" height="64" rx="14" fill="rgba(255, 255, 255, 0.05)" stroke="rgba(154, 48, 235, 0.3)" stroke-width="1.2" />
+        <text x="16" y="28" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="18" font-weight="900" fill="#a855f7">+100 Milhões</text>
+        <text x="16" y="48" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="12" font-weight="600" fill="#cbd5e1">Fotos, Vídeos & Brand Kit</text>
+      </g>
+    </g>
+
+    <!-- Bottom Verification Checks -->
+    <g transform="translate(0, 235)">
+      <g transform="translate(0, 0)">
+        <circle cx="8" cy="8" r="6" fill="#00c4cc" />
+        <polyline points="5,8 7,10 11,6" fill="none" stroke="#000" stroke-width="1.8" stroke-linecap="round" />
+        <text x="22" y="12" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="13" font-weight="700" fill="#e2e8f0">Ativação no seu Próprio E-mail</text>
+      </g>
+
+      <g transform="translate(235, 0)">
+        <circle cx="8" cy="8" r="6" fill="#00c4cc" />
+        <polyline points="5,8 7,10 11,6" fill="none" stroke="#000" stroke-width="1.8" stroke-linecap="round" />
+        <text x="22" y="12" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="13" font-weight="700" fill="#e2e8f0">Exportação em 4K e SVG Ilimitada</text>
+      </g>
+    </g>
+  </g>
 </svg>

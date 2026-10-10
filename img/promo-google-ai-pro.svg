@@ -1,16 +1,142 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif">
-<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2f6bff"/><stop offset=".55" stop-color="#8b3cf7"/><stop offset="1" stop-color="#ff4d6d"/></linearGradient></defs>
-<rect width="640" height="360" fill="url(#g)"/>
-<circle cx="560" cy="60" r="150" fill="#fff" opacity=".08"/><circle cx="90" cy="330" r="120" fill="#fff" opacity=".08"/>
-<g fill="#fff" opacity=".9"><circle cx="540" cy="70" r="6"/><circle cx="590" cy="120" r="4"/><circle cx="500" cy="130" r="3"/></g>
-<text x="40" y="70" fill="#fff" opacity=".9" font-size="22" font-weight="700" letter-spacing="3">PLANO DE</text>
-<text x="40" y="150" fill="#fff" font-size="82" font-weight="900">18 MESES</text>
-<rect x="40" y="185" width="200" height="86" rx="22" fill="#fff"/>
-<text x="140" y="238" fill="#2f6bff" font-size="52" font-weight="900" text-anchor="middle">5 TB</text>
-<text x="140" y="262" fill="#5d6380" font-size="15" font-weight="700" text-anchor="middle">DE ARMAZENAMENTO</text>
-<rect x="260" y="185" width="260" height="86" rx="22" fill="#fff"/>
-<text x="390" y="238" fill="#ff4d6d" font-size="52" font-weight="900" text-anchor="middle">1000</text>
-<text x="390" y="262" fill="#5d6380" font-size="15" font-weight="700" text-anchor="middle">CRÉDITOS DE IA POR MÊS</text>
-<rect x="40" y="298" width="300" height="38" rx="19" fill="#fff" opacity=".95"/>
-<text x="190" y="322" fill="#10142b" font-size="15" font-weight="800" text-anchor="middle" textLength="270" lengthAdjust="spacingAndGlyphs">PAGAMENTO ÚNICO · SEM MENSALIDADE</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGemini" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0d18" />
+      <stop offset="50%" stop-color="#101528" />
+      <stop offset="100%" stop-color="#18132c" />
+    </linearGradient>
+
+    <!-- Gemini Official Multi-Color Star Gradient -->
+    <linearGradient id="geminiGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1ba0e2" />
+      <stop offset="35%" stop-color="#4285f4" />
+      <stop offset="70%" stop-color="#9b72cb" />
+      <stop offset="100%" stop-color="#d96570" />
+    </linearGradient>
+
+    <radialGradient id="geminiGlow" cx="72%" cy="42%" r="65%">
+      <stop offset="0%" stop-color="#4285f4" stop-opacity="0.32" />
+      <stop offset="45%" stop-color="#9b72cb" stop-opacity="0.18" />
+      <stop offset="100%" stop-color="#0a0d18" stop-opacity="0" />
+    </radialGradient>
+
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <filter id="cardShadow">
+      <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#000" flood-opacity="0.55" />
+    </filter>
+  </defs>
+
+  <!-- Deep Canvas Background -->
+  <rect width="640" height="360" fill="url(#bgGemini)" />
+  <rect width="640" height="360" fill="url(#geminiGlow)" />
+
+  <!-- Subtle Blueprint Tech Lines -->
+  <g stroke="rgba(255, 255, 255, 0.04)" stroke-width="1">
+    <line x1="0" y1="90" x2="640" y2="90" />
+    <line x1="0" y1="180" x2="640" y2="180" />
+    <line x1="0" y1="270" x2="640" y2="270" />
+    <line x1="160" y1="0" x2="160" y2="360" />
+    <line x1="320" y1="0" x2="320" y2="360" />
+    <line x1="480" y1="0" x2="480" y2="360" />
+  </g>
+
+  <!-- Right Section: Official Gemini AI Star & Google One Ring -->
+  <g transform="translate(420, 50)" filter="url(#cardShadow)">
+    <!-- Soft Aura -->
+    <circle cx="100" cy="115" r="115" fill="url(#geminiGrad)" opacity="0.12" filter="url(#softGlow)" />
+
+    <!-- Google One Outer Multi-Color Segmented Ring -->
+    <circle cx="100" cy="115" r="92" fill="none" stroke="rgba(255, 255, 255, 0.06)" stroke-width="10" />
+    <!-- Blue arc -->
+    <path d="M 100,23 A 92 92 0 0 1 192,115" fill="none" stroke="#4285F4" stroke-width="8" stroke-linecap="round" />
+    <!-- Red arc -->
+    <path d="M 192,115 A 92 92 0 0 1 100,207" fill="none" stroke="#EA4335" stroke-width="8" stroke-linecap="round" />
+    <!-- Yellow arc -->
+    <path d="M 100,207 A 92 92 0 0 1 8,115" fill="none" stroke="#FBBC05" stroke-width="8" stroke-linecap="round" />
+    <!-- Green arc -->
+    <path d="M 8,115 A 92 92 0 0 1 100,23" fill="none" stroke="#34A853" stroke-width="8" stroke-linecap="round" />
+
+    <!-- Dark Inner Core Platform -->
+    <circle cx="100" cy="115" r="80" fill="#0f1424" stroke="rgba(255, 255, 255, 0.1)" stroke-width="1.5" />
+
+    <!-- Official Gemini 4-Point Curved Sparkle -->
+    <g transform="translate(100, 115) scale(0.68)">
+      <path d="M 0,-90 Q 0,0 90,0 Q 0,0 0,90 Q 0,0 -90,0 Q 0,0 0,-90 Z" fill="url(#geminiGrad)" />
+      <!-- Inner Brilliant Glow -->
+      <path d="M 0,-50 Q 0,0 50,0 Q 0,0 0,50 Q 0,0 -50,0 Q 0,0 0,-50 Z" fill="#ffffff" opacity="0.4" />
+    </g>
+
+    <!-- Complementary Micro Sparkle -->
+    <g transform="translate(172, 58) scale(0.22)">
+      <path d="M 0,-90 Q 0,0 90,0 Q 0,0 0,90 Q 0,0 -90,0 Q 0,0 0,-90 Z" fill="#9b72cb" />
+    </g>
+
+    <!-- Official Google One AI Premium Pill -->
+    <g transform="translate(32, 218)">
+      <rect width="136" height="28" rx="14" fill="#1e2438" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1" />
+      <text x="68" y="18" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="11" font-weight="800" fill="#8ab4f8" text-anchor="middle" letter-spacing="1">GEMINI PRO 1.5</text>
+    </g>
+  </g>
+
+  <!-- Left Content Area -->
+  <g transform="translate(42, 42)">
+    <!-- Official Google Logo Header Pill -->
+    <g transform="translate(0, 0)">
+      <rect width="210" height="34" rx="17" fill="rgba(255, 255, 255, 0.06)" stroke="rgba(255, 255, 255, 0.12)" stroke-width="1" />
+      
+      <!-- Authentic Google Multi-Color 'G' Vector Icon -->
+      <g transform="translate(12, 7) scale(0.85)">
+        <path fill="#4285F4" d="M22.5 11.5c0-.8-.07-1.55-.2-2.3H11.5v4.36h6.18c-.27 1.45-1.08 2.68-2.3 3.5v2.9h3.72c2.18-2 3.4-4.96 3.4-8.46z"/>
+        <path fill="#34A853" d="M11.5 22.7c3.1 0 5.7-1.02 7.6-2.77l-3.72-2.9c-1.03.69-2.35 1.1-3.88 1.1-2.98 0-5.5-2.02-6.4-4.73H1.27v3C3.21 20.3 7.07 22.7 11.5 22.7z"/>
+        <path fill="#FBBC05" d="M5.1 13.4c-.23-.69-.36-1.42-.36-2.18s.13-1.5.36-2.18V6.04H1.27C.46 7.66 0 9.48 0 11.22s.46 3.56 1.27 5.18l3.83-3z"/>
+        <path fill="#EA4335" d="M11.5 4.54c1.68 0 3.2.58 4.39 1.71l3.29-3.29C17.2 1.11 14.6 0 11.5 0 7.07 0 3.21 2.4 1.27 6.04l3.83 3c.9-2.71 3.42-4.5 6.4-4.5z"/>
+      </g>
+      
+      <text x="44" y="22" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="12" font-weight="800" fill="#ffffff" letter-spacing="0.5">Google One AI Pro</text>
+    </g>
+
+    <!-- Main Title -->
+    <text x="0" y="80" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="36" font-weight="900" fill="#ffffff" letter-spacing="-0.02em">
+      Gemini Advanced
+    </text>
+    <text x="0" y="112" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="22" font-weight="700" fill="#94a3b8">
+      Assinatura Oficial · 18 Meses
+    </text>
+
+    <!-- Highlights Features Grid -->
+    <g transform="translate(0, 138)">
+      <!-- Box 1: 5 TB Nuvem -->
+      <g transform="translate(0, 0)">
+        <rect width="170" height="64" rx="14" fill="rgba(255, 255, 255, 0.05)" stroke="rgba(66, 133, 244, 0.3)" stroke-width="1.2" />
+        <text x="16" y="28" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="20" font-weight="900" fill="#4285F4">5 TB</text>
+        <text x="16" y="48" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="12" font-weight="600" fill="#cbd5e1">Google Drive & Fotos</text>
+      </g>
+
+      <!-- Box 2: 1.000 Créditos IA -->
+      <g transform="translate(182, 0)">
+        <rect width="180" height="64" rx="14" fill="rgba(255, 255, 255, 0.05)" stroke="rgba(217, 101, 112, 0.3)" stroke-width="1.2" />
+        <text x="16" y="28" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="20" font-weight="900" fill="#d96570">1.000 / mês</text>
+        <text x="16" y="48" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="12" font-weight="600" fill="#cbd5e1">Créditos Veo 3 & IA</text>
+      </g>
+    </g>
+
+    <!-- Bottom Verification Checks -->
+    <g transform="translate(0, 235)">
+      <g transform="translate(0, 0)">
+        <circle cx="8" cy="8" r="6" fill="#34A853" />
+        <polyline points="5,8 7,10 11,6" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" />
+        <text x="22" y="12" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="13" font-weight="700" fill="#e2e8f0">Gemini 1.5 Pro + NotebookLM</text>
+      </g>
+
+      <g transform="translate(240, 0)">
+        <circle cx="8" cy="8" r="6" fill="#34A853" />
+        <polyline points="5,8 7,10 11,6" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" />
+        <text x="22" y="12" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="13" font-weight="700" fill="#e2e8f0">Pagamento Único Sem Renovação</text>
+      </g>
+    </g>
+  </g>
 </svg>

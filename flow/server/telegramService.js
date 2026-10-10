@@ -171,7 +171,7 @@ export async function notifyAdminNewOrder(order) {
     `🚨 *NOVA VENDA APROVADA!*\n\n` +
     `📦 *Pedido:* \`${order.id}\`\n` +
     `🏷 *Produto:* ${order.product_name}\n` +
-    `💰 *Valor:* R$ ${Number(order.amount).toFixed(2)}\n` +
+    `💰 *Valor:* R$ ${Number(order.amount).toFixed(2)} (${order.payment_method === 'credit_card' ? 'Cartão de Crédito' : 'PIX'})\n` +
     `👤 *Cliente:* ${order.customer_name}\n` +
     `📧 *E-mail:* ${order.customer_email}\n` +
     `📱 *Telefone:* ${order.customer_phone || 'Não informado'}\n\n` +

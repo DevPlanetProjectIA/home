@@ -20,12 +20,6 @@ export const PRODUCT_INSTRUCTIONS = {
     guide: `1. Acesse https://www.canva.com e faça login com seu e-mail.\n` +
            `2. Acesse o link de convite VIP ou insira a chave da equipe enviada para você.\n` +
            `3. Sua conta será promovida para o status PRO com todos os recursos desbloqueados por 12 meses.`
-  },
-  'chatgpt-plus-1m': {
-    name: 'ChatGPT Plus & GPT-4o — Mensal',
-    guide: `1. Acesse https://chatgpt.com.\n` +
-           `2. Utilize os dados de acesso/chave privativa fornecidos para entrar no perfil com GPT-4o ativado.\n` +
-           `3. Aproveite o acesso sem limites, DALL-E 3 e recursos de voz avançados.`
   }
 };
 
