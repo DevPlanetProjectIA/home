@@ -11,12 +11,16 @@ let orderPollInterval = null;
 let selectedPaymentMethod = "pix";
 
 // Configurações e Títulos da Loja
-document.title = `${CONFIG.storeName} — Licenças e Assinaturas com até 80% OFF`;
-$$("[data-store]").forEach(e => e.textContent = CONFIG.storeName);
+try {
+  document.title = `${CONFIG.storeName} — Licenças e Assinaturas com até 80% OFF`;
+  $$("[data-store]").forEach(e => e.textContent = CONFIG.storeName);
 
-const waSupportMsg = `Olá! Gostaria de tirar uma dúvida sobre as licenças da ${CONFIG.storeName}.`;
-if ($("#header-help")) $("#header-help").href = wa(waSupportMsg);
-if ($("#footer-wa")) $("#footer-wa").href = wa(waSupportMsg);
+  const waSupportMsg = `Olá! Gostaria de tirar uma dúvida sobre as licenças da ${CONFIG.storeName}.`;
+  if ($("#header-help")) $("#header-help").href = wa(waSupportMsg);
+  if ($("#footer-wa")) $("#footer-wa").href = wa(waSupportMsg);
+} catch (e) {
+  console.warn("Config initialization:", e);
+}
 
 // Renderização dos Produtos no Catálogo
 function renderCatalog() {
@@ -113,6 +117,12 @@ function renderCatalog() {
   }).join("");
 }
 
+// Renderiza imediatamente os produtos para nunca carregar escondido
+renderCatalog();
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", renderCatalog);
+}
+
 // Filtros por Categoria
 $$(".cat-tab").forEach(tab => {
   tab.addEventListener("click", () => {
@@ -153,13 +163,16 @@ function openProduct(id) {
   current = PRODUCTS.find(p => p.id === id);
   if (!current) return;
 
-  $("#p-img").src = current.image;
-  $("#p-img").alt = current.name;
-  $("#p-tag").textContent = current.tag || "Assinatura Digital";
-  $("#p-name").textContent = current.name;
-  $("#p-desc").textContent = current.description;
-  $("#p-old-price").textContent = current.originalPrice ? brl(current.originalPrice) : "";
-  $("#p-price").innerHTML = `${brl(current.price)} <small style="font-size:0.85rem; color:#4ade80; font-weight:800; text-transform:uppercase;">no PIX</small>`;
+  const pImg = $("#p-img");
+  if (pImg) {
+    pImg.src = current.image;
+    pImg.alt = current.name;
+  }
+  if ($("#p-tag")) $("#p-tag").textContent = current.tag || "Assinatura Digital";
+  if ($("#p-name")) $("#p-name").textContent = current.name;
+  if ($("#p-desc")) $("#p-desc").textContent = current.description;
+  if ($("#p-old-price")) $("#p-old-price").textContent = current.originalPrice ? brl(current.originalPrice) : "";
+  if ($("#p-price")) $("#p-price").innerHTML = `${brl(current.price)} <small style="font-size:0.85rem; color:#4ade80; font-weight:800; text-transform:uppercase;">no PIX</small>`;
   
   const creditPrice = current.creditPrice || current.price;
   const pCreditEl = $("#p-credit-price");
@@ -169,20 +182,26 @@ function openProduct(id) {
       : `ou em até 12x no cartão de crédito sem juros`;
   }
 
-  $("#p-feat").innerHTML = current.features.map(([t, d]) => `
-    <li style="background:rgba(255,255,255,0.03); border:1px solid var(--card-border); border-radius:10px; padding:10px 14px;">
-      <b style="display:block; color:#fff; font-size:0.95rem; margin-bottom:2px;">${esc(t)}</b>
-      <span class="muted" style="font-size:0.85rem;">${esc(d)}</span>
-    </li>
-  `).join("");
+  const pFeat = $("#p-feat");
+  if (pFeat) {
+    pFeat.innerHTML = current.features.map(([t, d]) => `
+      <li style="background:rgba(255,255,255,0.03); border:1px solid var(--card-border); border-radius:10px; padding:10px 14px;">
+        <b style="display:block; color:#fff; font-size:0.95rem; margin-bottom:2px;">${esc(t)}</b>
+        <span class="muted" style="font-size:0.85rem;">${esc(d)}</span>
+      </li>
+    `).join("");
+  }
 
-  dlg.prod.showModal();
+  if (dlg.prod) dlg.prod.showModal();
 }
 
-$("#p-buy").onclick = () => {
-  dlg.prod.close();
-  startCheckout(current);
-};
+const pBuyBtn = $("#p-buy");
+if (pBuyBtn) {
+  pBuyBtn.onclick = () => {
+    if (dlg.prod) dlg.prod.close();
+    startCheckout(current);
+  };
+}
 
 // Atualiza o estado da seleção de forma de pagamento no checkout
 function updatePaymentMethodUI() {
@@ -247,26 +266,31 @@ function startCheckout(prod) {
   if ($("#opt-pix")) $("#opt-pix").checked = true;
   if ($("#opt-card")) $("#opt-card").checked = false;
 
-  $("#s-form").hidden = false;
-  $("#s-pix").hidden = true;
-  $("#err").textContent = "";
+  if ($("#s-form")) $("#s-form").hidden = false;
+  if ($("#s-pix")) $("#s-pix").hidden = true;
+  if ($("#err")) $("#err").textContent = "";
 
   updatePaymentMethodUI();
-  dlg.buy.showModal();
+  if (dlg.buy) dlg.buy.showModal();
 }
 
-// Submissão do Formulário de Checkout
-$("#form").onsubmit = async e => {
-  e.preventDefault();
-  const name = $("#f-nome").value.trim();
-  const email = $("#f-email").value.trim();
-  const phone = $("#f-tel").value.replace(/\D/g, "");
+// Processa a submissão do checkout
+async function processCheckout(e) {
+  if (e) e.preventDefault();
 
-  const fail = m => { $("#err").textContent = m; };
+  const name = ($("#f-nome")?.value || "").trim();
+  const email = ($("#f-email")?.value || "").trim();
+  const phone = ($("#f-tel")?.value || "").replace(/\D/g, "");
+
+  const fail = m => { 
+    const el = $("#err"); 
+    if (el) el.textContent = m; 
+  };
+
   if (name.split(/\s+/).length < 2) return fail("Informe seu nome completo (nome e sobrenome).");
   if (phone.length < 10 || phone.length > 11) return fail("Informe um telefone WhatsApp válido com DDD.");
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return fail("Informe um e-mail válido.");
-  if (!$("#f-ok").checked) return fail("É necessário concordar com as condições de entrega.");
+  if (!$("#f-ok")?.checked) return fail("É necessário concordar com as condições de entrega.");
   fail("");
 
   const activeAmount = (selectedPaymentMethod === "credit_card")
@@ -275,8 +299,8 @@ $("#form").onsubmit = async e => {
 
   const btn = $("#btn-submit-order");
   const btnText = $("#btn-submit-text");
-  btn.disabled = true;
-  btnText.textContent = "Processando no Mercado Pago...";
+  if (btn) btn.disabled = true;
+  if (btnText) btnText.textContent = "Processando no Mercado Pago...";
 
   const apiBase = (typeof CONFIG !== 'undefined' && CONFIG.flowApi) ? CONFIG.flowApi.replace(/\/$/, "") : window.location.origin;
 
@@ -320,10 +344,15 @@ $("#form").onsubmit = async e => {
 
   order = { ref: orderId, name, email, phone, product: current.name, total: activeAmount };
 
-  btn.disabled = false;
-  btnText.textContent = "Prosseguir para o Pagamento";
+  if (btn) btn.disabled = false;
+  if (btnText) {
+    btnText.textContent = selectedPaymentMethod === "credit_card"
+      ? `Pagar ${brl(activeAmount)} no Cartão (Mercado Pago) 💳`
+      : `Pagar ${brl(activeAmount)} no PIX ⚡`;
+  }
 
-  $("#pay-total").textContent = brl(activeAmount);
+  const payTotalEl = $("#pay-total");
+  if (payTotalEl) payTotalEl.textContent = brl(activeAmount);
 
   const orderUrl = `pedido.html?id=${encodeURIComponent(orderId)}${accessToken ? `&token=${encodeURIComponent(accessToken)}` : ''}`;
   const btnOrder = $("#btn-open-order");
@@ -344,7 +373,6 @@ $("#form").onsubmit = async e => {
     const btnDirectCard = $("#btn-mp-pay-direct");
     if (btnDirectCard && ticketUrl) {
       btnDirectCard.href = ticketUrl;
-      // Abre a aba do Mercado Pago automaticamente para comodidade do usuário
       try { window.open(ticketUrl, "_blank"); } catch {}
     }
   } else {
@@ -355,26 +383,32 @@ $("#form").onsubmit = async e => {
     if (statusPill) statusPill.textContent = "Aguardando Pagamento PIX";
 
     const qrEl = $("#qr");
-    if (qrBase64) {
-      qrEl.innerHTML = `<img src="data:image/png;base64,${qrBase64}" style="width:100%;height:100%;object-fit:contain;" alt="QR Code PIX">`;
-    } else if (typeof QR !== 'undefined' && code) {
-      qrEl.innerHTML = QR.svg(code);
-    } else {
-      qrEl.textContent = "QR Code Gerado";
+    if (qrEl) {
+      if (qrBase64) {
+        qrEl.innerHTML = `<img src="data:image/png;base64,${qrBase64}" style="width:100%;height:100%;object-fit:contain;" alt="QR Code PIX">`;
+      } else if (typeof QR !== 'undefined' && code) {
+        qrEl.innerHTML = QR.svg(code);
+      } else {
+        qrEl.textContent = "QR Code Gerado";
+      }
     }
-    $("#code").value = code;
+    const codeEl = $("#code");
+    if (codeEl) codeEl.value = code;
   }
 
-  $("#paid").href = wa(
-    `Olá! Acabei de fazer um pedido na loja.\n\n` +
-    `Produto: ${current.name} (${brl(activeAmount)} via ${selectedPaymentMethod === 'credit_card' ? 'Cartão' : 'PIX'})\n` +
-    `Pedido: ${orderId}\n` +
-    `Nome: ${name}\n` +
-    `Acompanhamento: ${window.location.origin}/${orderUrl}`
-  );
+  const paidWa = $("#paid");
+  if (paidWa) {
+    paidWa.href = wa(
+      `Olá! Acabei de fazer um pedido na loja.\n\n` +
+      `Produto: ${current.name} (${brl(activeAmount)} via ${selectedPaymentMethod === 'credit_card' ? 'Cartão' : 'PIX'})\n` +
+      `Pedido: ${orderId}\n` +
+      `Nome: ${name}\n` +
+      `Acompanhamento: ${window.location.origin}/${orderUrl}`
+    );
+  }
 
-  $("#s-form").hidden = true;
-  $("#s-pix").hidden = false;
+  if ($("#s-form")) $("#s-form").hidden = true;
+  if ($("#s-pix")) $("#s-pix").hidden = false;
 
   // Polling automático: assim que o pagamento for aprovado, redireciona para a Área do Cliente
   if (accessToken) {
@@ -392,14 +426,28 @@ $("#form").onsubmit = async e => {
       } catch {}
     }, 3000);
   }
-};
+}
+
+// Vincula o evento do formulário e botão
+const formEl = $("#form");
+if (formEl) {
+  formEl.onsubmit = processCheckout;
+}
+
+const submitBtn = $("#btn-submit-order");
+if (submitBtn) {
+  submitBtn.addEventListener("click", e => {
+    if (!formEl) processCheckout(e);
+  });
+}
 
 // Botão Copiar Código PIX
 const copyBtn = $("#copy");
 if (copyBtn) {
   copyBtn.onclick = async () => {
-    const c = $("#code").value;
-    try { await navigator.clipboard.writeText(c); } catch { $("#code").select(); document.execCommand("copy"); }
+    const codeEl = $("#code");
+    const c = codeEl ? codeEl.value : "";
+    try { await navigator.clipboard.writeText(c); } catch { if (codeEl) { codeEl.select(); document.execCommand("copy"); } }
     copyBtn.innerHTML = `<span>Copiado com Sucesso ✓</span>`;
     setTimeout(() => {
       copyBtn.innerHTML = `
@@ -408,6 +456,3 @@ if (copyBtn) {
     }, 2500);
   };
 }
-
-// Inicializa a vitrine
-renderCatalog();
