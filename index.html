@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>DevPlanet Store — Licenças e Assinaturas Digitais com até 80% OFF</title>
 <meta name="description" content="Licenças digitais originais com pagamento facilitado pelo Mercado Pago e entrega automatizada diretamente no seu WhatsApp.">
+<link rel="icon" type="image/svg+xml" href="img/logo-devplanet.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -19,7 +23,7 @@
 <header class="top">
   <div class="wrap bar">
     <a class="brand" href="./">
-      <div class="brand-logo-icon">⚡</div>
+      <img src="img/logo-devplanet.svg" alt="DevPlanet Store" class="brand-logo-img">
       <div class="brand-text">
         <h1 data-store>DevPlanet Store</h1>
         <span>Licenças & Assinaturas</span>
@@ -307,7 +311,7 @@
     <div class="footer-grid">
       <div class="footer-col">
         <div class="brand" style="margin-bottom:14px;">
-          <div class="brand-logo-icon">⚡</div>
+          <img src="img/logo-devplanet.svg" alt="DevPlanet Store" class="brand-logo-img">
           <div class="brand-text">
             <h3 style="color:#fff; font-size:1.15rem; font-weight:800;" data-store>DevPlanet Store</h3>
             <span>Assinaturas Digitais Originais</span>
@@ -360,26 +364,27 @@
 <dialog id="dlg-prod">
   <div class="dlg">
     <button class="dlg-close" data-close aria-label="Fechar">×</button>
-    <div style="display:flex; gap:18px; align-items:center; margin-bottom:16px;">
-      <img id="p-img" alt="" style="width:120px; height:70px; object-fit:cover; border-radius:12px; border:1px solid var(--card-border);">
-      <div>
-        <span class="badge-tag" id="p-tag" style="display:inline-block; margin-bottom:4px;"></span>
-        <h2 id="p-name" style="font-size:1.4rem; font-weight:800; margin:0;"></h2>
-      </div>
+    
+    <div class="dlg-hero-media">
+      <img id="p-img" alt="" class="dlg-hero-img">
+      <span class="badge-tag dlg-hero-badge" id="p-tag"></span>
     </div>
     
-    <p id="p-desc" class="muted" style="line-height:1.6; margin-bottom:20px; font-size:0.95rem;"></p>
+    <div class="dlg-header">
+      <h2 id="p-name" class="dlg-title"></h2>
+      <p id="p-desc" class="dlg-desc"></p>
+    </div>
 
-    <h4 style="margin:16px 0 10px; color:#fff; font-size:0.95rem; text-transform:uppercase; letter-spacing:0.04em;">O Que Está Incluso:</h4>
-    <ul id="p-feat" style="list-style:none; display:grid; gap:8px; margin-bottom:20px; padding:0;"></ul>
+    <h4 class="dlg-section-title">O Que Está Incluso:</h4>
+    <ul id="p-feat" class="dlg-features-list"></ul>
 
-    <div style="background:rgba(255,255,255,0.03); border:1px solid var(--card-border); border-radius:14px; padding:18px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; margin-top:20px;">
+    <div class="dlg-pricing-box">
       <div>
-        <div style="display:flex; align-items:baseline; gap:8px;">
+        <div class="dlg-pricing-row">
           <span id="p-old-price" class="old-price"></span>
-          <b id="p-price" style="font-size:1.9rem; font-weight:900; color:#fff;"></b>
+          <b id="p-price" class="dlg-main-price"></b>
         </div>
-        <div id="p-credit-price" style="font-size:0.85rem; color:#94a3b8; margin:4px 0 6px; font-weight:600;"></div>
+        <div id="p-credit-price" class="dlg-credit-price"></div>
         <span class="price-pill">Pagamento Único · Sem Mensalidade</span>
       </div>
       <button class="btn big" id="p-buy" style="flex:1; min-width:200px;">Comprar Agora ⚡</button>

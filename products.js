@@ -2,7 +2,7 @@
 const PRODUCTS = [
   {
     id: "google-ai-pro-18m",
-    image: "img/promo-google-ai-pro.svg",
+    image: "img/promo-google-ai-pro.jpg",
     name: "Google AI Pro — 18 meses",
     tag: "Inteligência Artificial",
     category: "ia",
@@ -31,7 +31,7 @@ const PRODUCTS = [
   },
   {
     id: "canva-pro-12m",
-    image: "img/promo-canva-pro.svg",
+    image: "img/promo-canva-pro.jpg",
     name: "Canva Pro — 12 meses",
     tag: "Design & Produtividade",
     category: "design",
@@ -59,7 +59,7 @@ const PRODUCTS = [
   },
   {
     id: "duolingo-super-12m",
-    image: "img/promo-duolingo-super.svg",
+    image: "img/promo-duolingo-super.jpg",
     name: "Duolingo Super — 12 meses",
     tag: "Idiomas & Cursos",
     category: "idiomas",
