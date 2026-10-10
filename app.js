@@ -451,12 +451,13 @@ async function processCheckout(e) {
 
   const paidWa = $("#paid");
   if (paidWa) {
+    const orderFullUrl = new URL(orderUrl, window.location.href).href;
     paidWa.href = wa(
       `Olá! Acabei de fazer um pedido na loja.\n\n` +
       `Produto: ${current.name} (${brl(activeAmount)} via ${selectedPaymentMethod === 'credit_card' ? 'Cartão' : 'PIX'})\n` +
       `Pedido: ${orderId}\n` +
       `Nome: ${name}\n` +
-      `Acompanhamento: ${window.location.origin}/${orderUrl}`
+      `Acompanhamento: ${orderFullUrl}`
     );
   }
 

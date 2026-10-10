@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360">
   <defs>
     <linearGradient id="bgPrime" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#040b14" />
@@ -35,12 +35,12 @@
     <line x1="480" y1="0" x2="480" y2="360" />
   </g>
 
-  <!-- Right Visual: Prime Video Visual & Smile Curve -->
+  <!-- Right Visual: Prime Video Visual &amp; Smile Curve -->
   <g transform="translate(425, 52)" filter="url(#primeShadow)">
     <circle cx="95" cy="112" r="110" fill="url(#primeBlueGrad)" opacity="0.12" />
     <circle cx="95" cy="112" r="88" fill="#0c1e36" stroke="rgba(0, 168, 225, 0.4)" stroke-width="2" />
 
-    <!-- Prime Play Button & Smile Curve Symbol -->
+    <!-- Prime Play Button &amp; Smile Curve Symbol -->
     <g transform="translate(68, 72)">
       <!-- Play Triangle -->
       <polygon points="18,10 48,28 18,46" fill="#00a8e1" />
@@ -51,7 +51,7 @@
 
     <g transform="translate(25, 218)">
       <rect width="140" height="28" rx="14" fill="#081424" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1" />
-      <text x="70" y="18" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="11" font-weight="800" fill="#38bdf8" text-anchor="middle" letter-spacing="0.5">FILMES & SÉRIES 4K</text>
+      <text x="70" y="18" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="11" font-weight="800" fill="#38bdf8" text-anchor="middle" letter-spacing="0.5">FILMES &amp; SÉRIES 4K</text>
     </g>
   </g>
 
@@ -77,7 +77,7 @@
       <g transform="translate(0, 0)">
         <rect width="170" height="64" rx="14" fill="rgba(255, 255, 255, 0.05)" stroke="rgba(0, 168, 225, 0.3)" stroke-width="1.2" />
         <text x="16" y="28" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="20" font-weight="900" fill="#00a8e1">4K Ultra HD</text>
-        <text x="16" y="48" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="12" font-weight="600" fill="#cbd5e1">Qualidade Máxima & HDR</text>
+        <text x="16" y="48" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="12" font-weight="600" fill="#cbd5e1">Qualidade Máxima &amp; HDR</text>
       </g>
 
       <g transform="translate(182, 0)">

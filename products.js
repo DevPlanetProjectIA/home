@@ -2,7 +2,7 @@
 const PRODUCTS = [
   {
     id: "google-ai-pro-18m",
-    image: "img/promo-google-ai-pro.svg",
+    image: "img/promo-google-ai-pro.jpg",
     name: "Google AI Pro — 18 meses",
     tag: "Inteligência Artificial",
     category: "ia",
@@ -31,7 +31,7 @@ const PRODUCTS = [
   },
   {
     id: "lovable-lite-12m",
-    image: "img/promo-lovable-lite.svg",
+    image: "img/promo-lovable-lite.jpg",
     name: "Lovable Lite — 12 meses",
     tag: "Inteligência Artificial & Dev",
     category: "ia",
@@ -59,7 +59,7 @@ const PRODUCTS = [
   },
   {
     id: "microsoft-365-12m",
-    image: "img/promo-microsoft-365.svg",
+    image: "img/promo-microsoft-365.jpg",
     name: "Microsoft 365 Premium — 12 meses",
     tag: "Produtividade & Office",
     category: "produtividade",
@@ -87,7 +87,7 @@ const PRODUCTS = [
   },
   {
     id: "adobe-express-12m",
-    image: "img/promo-adobe-express.svg",
+    image: "img/promo-adobe-express.jpg",
     name: "Adobe Express — 12 meses",
     tag: "Design & IA",
     category: "design",
@@ -115,7 +115,7 @@ const PRODUCTS = [
   },
   {
     id: "prime-video-6m",
-    image: "img/promo-prime-video.svg",
+    image: "img/promo-prime-video.jpg",
     name: "Amazon Prime Video — 6 meses",
     tag: "Streaming & Filmes",
     category: "streaming",
@@ -143,7 +143,7 @@ const PRODUCTS = [
   },
   {
     id: "duolingo-super-12m",
-    image: "img/promo-duolingo-super.svg",
+    image: "img/promo-duolingo-super.jpg",
     name: "Duolingo Super — 12 meses",
     tag: "Idiomas & Cursos",
     category: "idiomas",
