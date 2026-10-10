@@ -6,14 +6,62 @@ export const PRODUCT_INSTRUCTIONS = {
   'google-ai-pro-18m': {
     name: 'Google AI Pro — 18 meses (5 TB)',
     guide: `1. Acesse o Google Workspace / Gemini com a sua conta Google.\n` +
-           `2. Utilize o código de licença / convite fornecido abaixo para ativar seu período de 18 meses com 5 TB de armazenamento no Google Drive.\n` +
+           `2. Utilize o convite ou chave de ativação fornecida abaixo para vincular seu período de 18 meses com 5 TB de armazenamento no Google Drive.\n` +
            `3. O saldo mensal de 1.000 créditos de IA será disponibilizado automaticamente no seu painel.`
   },
   'google-ai-pro': {
     name: 'Google AI Pro — 18 meses (5 TB)',
     guide: `1. Acesse o Google Workspace / Gemini com a sua conta Google.\n` +
-           `2. Utilize o código de licença / convite fornecido abaixo para ativar seu período de 18 meses com 5 TB de armazenamento no Google Drive.\n` +
+           `2. Utilize o convite ou chave de ativação fornecida abaixo para vincular seu período de 18 meses com 5 TB de armazenamento no Google Drive.\n` +
            `3. O saldo mensal de 1.000 créditos de IA será disponibilizado automaticamente no seu painel.`
+  },
+  'lovable-lite-12m': {
+    name: 'Lovable Lite — 12 meses',
+    guide: `1. Acesse https://lovable.dev e faça login com sua conta (GitHub ou e-mail).\n` +
+           `2. Vá em Configurações (Settings) > Assinatura / Código de Resgate.\n` +
+           `3. Insira o código da sua licença para ativar 12 meses de acesso Lovable Lite com créditos e deploy full-stack.`
+  },
+  'lovable-lite': {
+    name: 'Lovable Lite — 12 meses',
+    guide: `1. Acesse https://lovable.dev e faça login com sua conta (GitHub ou e-mail).\n` +
+           `2. Vá em Configurações (Settings) > Assinatura / Código de Resgate.\n` +
+           `3. Insira o código da sua licença para ativar 12 meses de acesso Lovable Lite com créditos e deploy full-stack.`
+  },
+  'microsoft-365-12m': {
+    name: 'Microsoft 365 Premium — 12 meses',
+    guide: `1. Acesse https://setup.office.com ou https://microsoft365.com/redeem com sua conta Microsoft (Outlook/Hotmail).\n` +
+           `2. Insira a sua chave de ativação de 25 dígitos fornecida abaixo.\n` +
+           `3. Confirme para vincular os 12 meses de assinatura oficial e 1 TB de armazenamento seguro no OneDrive.`
+  },
+  'microsoft-365': {
+    name: 'Microsoft 365 Premium — 12 meses',
+    guide: `1. Acesse https://setup.office.com ou https://microsoft365.com/redeem com sua conta Microsoft (Outlook/Hotmail).\n` +
+           `2. Insira a sua chave de ativação de 25 dígitos fornecida abaixo.\n` +
+           `3. Confirme para vincular os 12 meses de assinatura oficial e 1 TB de armazenamento seguro no OneDrive.`
+  },
+  'adobe-express-12m': {
+    name: 'Adobe Express — 12 meses',
+    guide: `1. Acesse https://express.adobe.com ou https://redeem.adobe.com com seu Adobe ID (ou crie um gratuitamente).\n` +
+           `2. Insira o código da sua licença de resgate.\n` +
+           `3. Seu status Premium será liberado imediatamente com IA Firefly, +25.000 fontes e acervo Adobe Stock por 12 meses.`
+  },
+  'adobe-express': {
+    name: 'Adobe Express — 12 meses',
+    guide: `1. Acesse https://express.adobe.com ou https://redeem.adobe.com com seu Adobe ID (ou crie um gratuitamente).\n` +
+           `2. Insira o código da sua licença de resgate.\n` +
+           `3. Seu status Premium será liberado imediatamente com IA Firefly, +25.000 fontes e acervo Adobe Stock por 12 meses.`
+  },
+  'prime-video-6m': {
+    name: 'Amazon Prime Video — 6 meses',
+    guide: `1. Acesse https://www.primevideo.com ou baixe o app no celular/Smart TV.\n` +
+           `2. Siga as orientações de ativação fornecidas abaixo para desbloquear seu acesso de 6 meses em 4K Ultra HD.\n` +
+           `3. Aproveite o catálogo completo de filmes, séries e produções Amazon Originals.`
+  },
+  'prime-video': {
+    name: 'Amazon Prime Video — 6 meses',
+    guide: `1. Acesse https://www.primevideo.com ou baixe o app no celular/Smart TV.\n` +
+           `2. Siga as orientações de ativação fornecidas abaixo para desbloquear seu acesso de 6 meses em 4K Ultra HD.\n` +
+           `3. Aproveite o catálogo completo de filmes, séries e produções Amazon Originals.`
   },
   'duolingo-super-12m': {
     name: 'Duolingo Super — 12 meses',
@@ -26,18 +74,6 @@ export const PRODUCT_INSTRUCTIONS = {
     guide: `1. Abra o aplicativo do Duolingo ou acesse https://www.duolingo.com.\n` +
            `2. Acesse seu perfil > Configurações > Ativar Código Promocional / Plano Super.\n` +
            `3. Insira o código da sua licença para desbloquear os 12 meses sem anúncios e com vidas infinitas.`
-  },
-  'canva-pro-12m': {
-    name: 'Canva Pro — 12 meses',
-    guide: `1. Acesse https://www.canva.com e faça login com seu e-mail.\n` +
-           `2. Acesse o link de convite VIP ou insira a chave da equipe enviada para você.\n` +
-           `3. Sua conta será promovida para o status PRO com todos os recursos desbloqueados por 12 meses.`
-  },
-  'canva-pro': {
-    name: 'Canva Pro — 12 meses',
-    guide: `1. Acesse https://www.canva.com e faça login com seu e-mail.\n` +
-           `2. Acesse o link de convite VIP ou insira a chave da equipe enviada para você.\n` +
-           `3. Sua conta será promovida para o status PRO com todos os recursos desbloqueados por 12 meses.`
   }
 };
 
