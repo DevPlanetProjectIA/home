@@ -103,3 +103,57 @@ export async function sendAutoWhatsAppMessage(phone, text) {
     return { success: false, error: err.message };
   }
 }
+
+/**
+ * Busca todos os grupos dos quais o WhatsApp conectado participa
+ */
+export async function fetchWhatsAppGroups() {
+  if (!sock || !isConnected) {
+    return { success: false, error: 'WhatsApp desconectado', groups: [] };
+  }
+  try {
+    const participating = await sock.groupFetchAllParticipating();
+    const groups = Object.values(participating).map(g => ({
+      id: g.id,
+      subject: g.subject,
+      participantsCount: g.participants?.length || 0,
+      creation: g.creation
+    }));
+    return { success: true, groups };
+  } catch (err) {
+    console.error('[WhatsApp Group Fetch Error]:', err.message);
+    return { success: false, error: err.message, groups: [] };
+  }
+}
+
+/**
+ * Disparo automatizado com proteção Anti-Ban (Delay humanizado)
+ */
+export async function broadcastToWhatsAppGroups(groupJids, text, delaySeconds = 20) {
+  if (!sock || !isConnected) {
+    return { success: false, error: 'WhatsApp desconectado' };
+  }
+
+  const results = [];
+  console.log(`[WhatsApp Broadcast] Iniciando disparo seguro para ${groupJids.length} grupos (delay: ${delaySeconds}s)...`);
+
+  for (let i = 0; i < groupJids.length; i++) {
+    const jid = groupJids[i];
+    try {
+      const res = await sock.sendMessage(jid, { text });
+      results.push({ jid, success: true, messageId: res.key?.id });
+      console.log(`[WhatsApp Broadcast] (${i + 1}/${groupJids.length}) Enviado para ${jid}`);
+    } catch (err) {
+      results.push({ jid, success: false, error: err.message });
+      console.warn(`[WhatsApp Broadcast Warning] Falha ao enviar para ${jid}:`, err.message);
+    }
+
+    // Delay anti-ban entre grupos (simulação humana para proteger o chip)
+    if (i < groupJids.length - 1) {
+      const waitTime = (delaySeconds + Math.floor(Math.random() * 8)) * 1000;
+      await new Promise(r => setTimeout(r, waitTime));
+    }
+  }
+
+  return { success: true, results };
+}

@@ -9,7 +9,7 @@ import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { fulfillOrderLicense } from './licenseService.js';
 import { startTelegramPolling, notifyAdminNewOrder } from './telegramService.js';
-import { startWhatsAppService, getWhatsAppStatus, sendAutoWhatsAppMessage } from './whatsappService.js';
+import { startWhatsAppService, getWhatsAppStatus, sendAutoWhatsAppMessage, fetchWhatsAppGroups, broadcastToWhatsAppGroups } from './whatsappService.js';
 
 import { initDatabase } from './db.js';
 
@@ -495,6 +495,22 @@ eco.post('/orders/:id/deliver', async (req, res) => {
 // 7. Status do WhatsApp Web (para pareamento via QR Code)
 app.get('/api/whatsapp/status', (_req, res) => {
   res.json(getWhatsAppStatus());
+});
+
+// 8. Buscar Grupos do WhatsApp do usuário
+app.get('/api/whatsapp/groups', async (_req, res) => {
+  const result = await fetchWhatsAppGroups();
+  res.json(result);
+});
+
+// 9. Disparo Seguro em Grupos de WhatsApp (Marketing Automatizado com Anti-Ban)
+app.post('/api/whatsapp/broadcast', async (req, res) => {
+  const { groupJids, text, delaySeconds } = req.body || {};
+  if (!Array.isArray(groupJids) || groupJids.length === 0 || !text) {
+    return res.status(400).json({ error: 'Informe os grupos (groupJids) e o texto da mensagem.' });
+  }
+  const result = await broadcastToWhatsAppGroups(groupJids, text, delaySeconds || 20);
+  res.json(result);
 });
 
 app.use('/api/ecommerce', eco);

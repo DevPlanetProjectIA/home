@@ -60,6 +60,31 @@ async function handleTelegramUpdate(update, db, token) {
     return;
   }
 
+  // Comando /divulgar ou /ofertas: gera cópia promocional pronta de alta conversão
+  if (text.startsWith('/divulgar') || text.startsWith('/ofertas')) {
+    const promoCopy = 
+      `🔥 *OFERTAS RELÂMPAGO — DEVPLANET STORE* 🔥\n\n` +
+      `Economize até 80% nas ferramentas mais procuradas do mundo sem mensalidade! Pagamento seguro via Mercado Pago (PIX ou Cartão em 12x):\n\n` +
+      `💼 *Microsoft 365 Premium (12 meses):* R$ 89,00\n` +
+      `↳ Word, Excel, PowerPoint + 1 TB Nuvem no OneDrive\n\n` +
+      `🚀 *Lovable Lite (12 meses):* R$ 139,90\n` +
+      `↳ Crie softwares com IA, exportação GitHub e deploy\n\n` +
+      `🎨 *Adobe Express (12 meses):* R$ 40,00\n` +
+      `↳ IA Adobe Firefly, +25k fontes e Adobe Stock\n\n` +
+      `🍿 *Amazon Prime Video (6 meses):* R$ 79,90\n` +
+      `↳ Filmes e séries em 4K Ultra HD em 3 telas\n\n` +
+      `🤖 *Google AI Pro (18 meses):* R$ 50,00\n` +
+      `↳ Gemini 1.5 Pro + 5 TB no Google Drive\n\n` +
+      `🌍 *Duolingo Super (12 meses):* R$ 40,00\n` +
+      `↳ Vidas infinitas e zero anúncios\n\n` +
+      `🛒 *Acesse a loja e garanta a sua:*\n` +
+      `👉 https://devplanetprojectia.github.io/home/\n\n` +
+      `⏱️ Entrega em até 24h no WhatsApp com garantia total!`;
+
+    await sendTelegramMessage(token, chatId, promoCopy);
+    return;
+  }
+
   // Verificar se é comando /entregar <id> <chave>
   const deliverMatch = text.match(/^\/entregar\s+([A-Za-z0-9\-_]+)\s+(.+)$/i);
   let orderId = deliverMatch ? deliverMatch[1] : null;
