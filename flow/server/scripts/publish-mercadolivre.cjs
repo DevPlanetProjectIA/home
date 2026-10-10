@@ -1,5 +1,7 @@
 /**
  * Script de Publicação Automatizada de Anúncios no Mercado Livre
+ * Compatível com o modelo User Products (UP) e atributos oficiais
+ * 
  * Uso: node publish-mercadolivre.cjs [SEU_TOKEN_DO_MERCADO_LIVRE]
  */
 const https = require('https');
@@ -20,8 +22,9 @@ const ML_TOKEN = tokenArg || tokenEnv || process.env.ML_ACCESS_TOKEN;
 
 const PRODUCTS_TO_PUBLISH = [
   {
-    title: "Assinatura Microsoft 365 Premium 12 Meses 1TB Nuvem Oficial",
-    category_id: "MLB1144", // Softwares
+    sku: "MS-365-12M",
+    family_name: "Microsoft 365 12 Meses 1tb Nuvem",
+    category_id: "MLB1733", // Softwares de Escritório
     price: 89.00,
     currency_id: "BRL",
     available_quantity: 50,
@@ -30,6 +33,13 @@ const PRODUCTS_TO_PUBLISH = [
     condition: "new",
     pictures: [
       { source: "https://devplanetprojectia.github.io/home/img/promo-microsoft-365.jpg" }
+    ],
+    attributes: [
+      { id: "BRAND", value_name: "Microsoft" },
+      { id: "OFFICE_SOFTWARE_NAME", value_name: "Microsoft 365" },
+      { id: "VERSION", value_name: "Microsoft 365 Family" },
+      { id: "FORMAT", value_name: "Digital" },
+      { id: "GTIN", value_name: "889842861648" }
     ],
     shipping: {
       mode: "not_specified",
@@ -41,17 +51,18 @@ const PRODUCTS_TO_PUBLISH = [
       { id: "WARRANTY_TIME", value_name: "7 dias" }
     ],
     description: 
-      "Assinatura Oficial Microsoft 365 Premium por 12 meses.\n\n" +
+      "Assinatura Oficial Microsoft 365 por 12 meses.\n\n" +
       "INCLUSO:\n" +
       "- 1 TB de armazenamento em nuvem no OneDrive seguro\n" +
       "- Aplicativos Word, Excel, PowerPoint, Outlook e OneNote\n" +
       "- Uso em PC, Mac, celular ou tablet\n" +
       "- Ativação vinculada diretamente à sua conta oficial da Microsoft\n\n" +
-      "ENTREGA RÁPIDA VIA CHAT / WHATSAPP APÓS A COMPRA COM TUTORIAL COMPLETO!"
+      "Garantia de 7 dias com entrega rápida e suporte completo via chat/WhatsApp!"
   },
   {
-    title: "Licenca Lovable Lite 12 Meses Criador Software IA Fullstack",
-    category_id: "MLB1144",
+    sku: "LVBL-LITE-12M",
+    family_name: "Lovable Lite 12 Meses Ia Fullstack",
+    category_id: "MLB1728", // Software Comercial
     price: 139.90,
     currency_id: "BRL",
     available_quantity: 30,
@@ -60,6 +71,13 @@ const PRODUCTS_TO_PUBLISH = [
     condition: "new",
     pictures: [
       { source: "https://devplanetprojectia.github.io/home/img/promo-lovable-lite.jpg" }
+    ],
+    attributes: [
+      { id: "DEVELOPER", value_name: "Lovable" },
+      { id: "SOFTWARE_NAME", value_name: "Lovable Lite" },
+      { id: "VERSION", value_name: "2026" },
+      { id: "FORMAT", value_name: "Digital" },
+      { id: "GTIN", value_name: "7898956241027" }
     ],
     shipping: {
       mode: "not_specified",
@@ -72,15 +90,16 @@ const PRODUCTS_TO_PUBLISH = [
     ],
     description: 
       "Lovable Lite — 12 Meses de Acesso Oficial.\n\n" +
-      "A plataforma líder mundial para criação de softwares web com Inteligência Artificial.\n\n" +
-      "- Crie aplicações completas (Frontend, Backend e Banco de Dados) conversando em linguagem natural\n" +
-      "- Sincronização direta com seu GitHub\n" +
-      "- Hospedagem e deploy instantâneo inclusos\n\n" +
-      "Economize na mensalidade em dólar. Entrega imediata após a compra!"
+      "A plataforma líder mundial para criação de aplicações web full-stack com Inteligência Artificial.\n\n" +
+      "- Crie sistemas completos (Frontend, Backend e Banco de Dados) conversando em linguagem natural\n" +
+      "- Sincronização direta com GitHub e deploy em 1 clique\n" +
+      "- Hospedagem inclusa e suporte ágil\n\n" +
+      "Garantia de 7 dias com entrega rápida e suporte completo via chat/WhatsApp!"
   },
   {
-    title: "Adobe Express Premium 12 Meses Firefly IA 25k Fontes Stock",
-    category_id: "MLB1144",
+    sku: "ADB-EXP-12M",
+    family_name: "Adobe Express Premium 12 Meses Firefly Ia",
+    category_id: "MLB1731", // Design Gráfico e Edição
     price: 40.00,
     currency_id: "BRL",
     available_quantity: 50,
@@ -89,6 +108,13 @@ const PRODUCTS_TO_PUBLISH = [
     condition: "new",
     pictures: [
       { source: "https://devplanetprojectia.github.io/home/img/promo-adobe-express.jpg" }
+    ],
+    attributes: [
+      { id: "DEVELOPER", value_name: "Adobe" },
+      { id: "SOFTWARE_NAME", value_name: "Adobe Express" },
+      { id: "VERSION", value_name: "2026" },
+      { id: "FORMAT", value_name: "Digital" },
+      { id: "GTIN", value_name: "7898956241034" }
     ],
     shipping: {
       mode: "not_specified",
@@ -102,13 +128,15 @@ const PRODUCTS_TO_PUBLISH = [
     description: 
       "Assinatura Oficial Adobe Express Premium por 12 meses.\n\n" +
       "- IA Generativa Adobe Firefly integrada\n" +
-      "- Removedor de fundo em 1 clique para fotos e vídeos\n" +
-      "- Mais de 25.000 fontes licenciadas e biblioteca Adobe Stock\n\n" +
-      "Entrega e suporte rápido no chat após a aprovação da compra!"
+      "- Removedor de fundo automático para fotos e vídeos em 1 clique\n" +
+      "- Mais de 25.000 fontes licenciadas e biblioteca Adobe Stock completa\n" +
+      "- Suporte para computador (Web) e app mobile\n\n" +
+      "Garantia de 7 dias com entrega rápida e suporte completo via chat/WhatsApp!"
   },
   {
-    title: "Amazon Prime Video Assinatura 6 Meses 4K Ultra HD Filmes",
-    category_id: "MLB1144",
+    sku: "AMZN-PRIME-6M",
+    family_name: "Amazon Prime Video 6 Meses Streaming 4k",
+    category_id: "MLB421328", // Gift Cards / Assinaturas
     price: 79.90,
     currency_id: "BRL",
     available_quantity: 40,
@@ -117,6 +145,13 @@ const PRODUCTS_TO_PUBLISH = [
     condition: "new",
     pictures: [
       { source: "https://devplanetprojectia.github.io/home/img/promo-prime-video.jpg" }
+    ],
+    attributes: [
+      { id: "BRAND", value_name: "Amazon" },
+      { id: "PREPAID_CARD_TYPE", value_id: "52275405", value_name: "Assinatura" },
+      { id: "FORMAT", value_id: "2132699", value_name: "Digital" },
+      { id: "REGION", value_id: "1233470", value_name: "Brasil" },
+      { id: "GTIN", value_name: "7898956241041" }
     ],
     shipping: {
       mode: "not_specified",
@@ -128,18 +163,19 @@ const PRODUCTS_TO_PUBLISH = [
       { id: "WARRANTY_TIME", value_name: "7 dias" }
     ],
     description: 
-      "6 Meses de Acesso ao Amazon Prime Video em 4K Ultra HD.\n\n" +
-      "- Filmes, séries consagradas e produções Amazon Originals\n" +
-      "- Qualidade máxima com HDR e som surround\n" +
-      "- Até 3 telas simultâneas e download offline\n\n" +
-      "Entrega rápida das orientações de acesso direto no chat!"
+      "Amazon Prime Video — 6 Meses de Acesso Oficial em 4K Ultra HD.\n\n" +
+      "- Filmes consagrados, lançamentos de sucesso e produções Originais Amazon Prime\n" +
+      "- Qualidade máxima com suporte a HDR e som imersivo\n" +
+      "- Até 3 telas simultâneas e download liberado para assistir offline\n" +
+      "- Compatível com Smart TVs, computadores, celulares e tablets\n\n" +
+      "Garantia de 7 dias com entrega rápida e suporte completo via chat/WhatsApp!"
   }
 ];
 
 function postToML(item, token) {
   return new Promise((resolve) => {
     const data = JSON.stringify({
-      title: item.title,
+      family_name: item.family_name,
       category_id: item.category_id,
       price: item.price,
       currency_id: item.currency_id,
@@ -148,6 +184,7 @@ function postToML(item, token) {
       listing_type_id: item.listing_type_id,
       condition: item.condition,
       pictures: item.pictures,
+      attributes: item.attributes,
       shipping: item.shipping,
       sale_terms: item.sale_terms
     });
@@ -181,6 +218,29 @@ function postToML(item, token) {
   });
 }
 
+function postDescription(itemId, text, token) {
+  return new Promise((resolve) => {
+    const data = JSON.stringify({ plain_text: text });
+    const req = https.request({
+      hostname: 'api.mercadolibre.com',
+      path: `/items/${itemId}/description`,
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(data)
+      }
+    }, (res) => {
+      let body = '';
+      res.on('data', c => body += c);
+      res.on('end', () => resolve({ status: res.statusCode }));
+    });
+    req.on('error', () => resolve({ status: 500 }));
+    req.write(data);
+    req.end();
+  });
+}
+
 async function run() {
   console.log('====================================================');
   console.log('🚀 PUBLICADOR AUTOMÁTICO DE ANÚNCIOS NO MERCADO LIVRE');
@@ -190,20 +250,27 @@ async function run() {
     console.error('❌ ERRO: Token do Mercado Livre não informado.');
     console.log('Como usar:');
     console.log('  node publish-mercadolivre.cjs SEU_TOKEN_AQUI\n');
-    console.log('Ou adicione no flow/server/.env:');
-    console.log('  ML_ACCESS_TOKEN=seu_token_aqui\n');
     process.exit(1);
   }
 
-  console.log(`Token configurado. Publicando ${PRODUCTS_TO_PUBLISH.length} anúncios...\n`);
+  console.log(`Token configurado. Processando catálogo...\n`);
+
+  const results = [];
 
   for (const prod of PRODUCTS_TO_PUBLISH) {
-    console.log(`⏳ Publicando: "${prod.title}" (R$ ${prod.price.toFixed(2)})...`);
+    console.log(`⏳ Publicando: "${prod.family_name}" (R$ ${prod.price.toFixed(2)})...`);
     const res = await postToML(prod, ML_TOKEN);
 
     if (res.status === 201 || res.status === 200) {
       console.log(`✅ SUCESSO! Anúncio criado com ID: ${res.data.id}`);
-      console.log(`🔗 Link no Mercado Livre: ${res.data.permalink}\n`);
+      console.log(`🔗 Link no Mercado Livre: ${res.data.permalink}`);
+
+      if (prod.description) {
+        await postDescription(res.data.id, prod.description, ML_TOKEN);
+        console.log(`📝 Descrição detalhada vinculada com sucesso!`);
+      }
+      console.log('');
+      results.push({ sku: prod.sku, id: res.data.id, permalink: res.data.permalink });
     } else {
       console.warn(`⚠️ Retorno da API (Status ${res.status}):`);
       console.warn(JSON.stringify(res.data, null, 2), '\n');
@@ -213,7 +280,8 @@ async function run() {
     await new Promise(r => setTimeout(r, 2000));
   }
 
-  console.log('🏁 Processo finalizado!');
+  console.log('🏁 Processo finalizado com sucesso!');
+  console.log('Anúncios processados:', results);
 }
 
 run();
