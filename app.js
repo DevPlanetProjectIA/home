@@ -158,6 +158,15 @@ document.addEventListener("click", e => {
   }
 });
 
+// Fechar modal ao clicar fora (no backdrop)
+[dlg.prod, dlg.buy].forEach(d => {
+  if (d) {
+    d.addEventListener("click", e => {
+      if (e.target === d) d.close();
+    });
+  }
+});
+
 // Abrir Detalhes do Produto
 function openProduct(id) {
   current = PRODUCTS.find(p => p.id === id);
@@ -266,9 +275,28 @@ function startCheckout(prod) {
   if ($("#opt-pix")) $("#opt-pix").checked = true;
   if ($("#opt-card")) $("#opt-card").checked = false;
 
-  if ($("#s-form")) $("#s-form").hidden = false;
-  if ($("#s-pix")) $("#s-pix").hidden = true;
+  const sForm = $("#s-form");
+  const sPix = $("#s-pix");
+  if (sForm) {
+    sForm.hidden = false;
+    sForm.style.display = "block";
+  }
+  if (sPix) {
+    sPix.hidden = true;
+    sPix.style.display = "none";
+  }
   if ($("#err")) $("#err").textContent = "";
+
+  const boxPix = $("#box-pix-content");
+  const boxCard = $("#box-card-content");
+  if (boxPix) {
+    boxPix.hidden = false;
+    boxPix.style.display = "grid";
+  }
+  if (boxCard) {
+    boxCard.hidden = true;
+    boxCard.style.display = "none";
+  }
 
   updatePaymentMethodUI();
   if (dlg.buy) dlg.buy.showModal();
@@ -365,20 +393,35 @@ async function processCheckout(e) {
 
   if (selectedPaymentMethod === "credit_card") {
     // Modo Cartão de Crédito
-    if (boxPix) boxPix.hidden = true;
-    if (boxCard) boxCard.hidden = false;
+    if (boxPix) {
+      boxPix.hidden = true;
+      boxPix.style.display = "none";
+    }
+    if (boxCard) {
+      boxCard.hidden = false;
+      boxCard.style.display = "block";
+    }
     if (subMsg) subMsg.textContent = `Cobrança de ${brl(activeAmount)} gerada no Mercado Pago. Parcele em até 12x no cartão!`;
     if (statusPill) statusPill.textContent = "Aguardando Pagamento no Cartão";
 
     const btnDirectCard = $("#btn-mp-pay-direct");
-    if (btnDirectCard && ticketUrl) {
-      btnDirectCard.href = ticketUrl;
-      try { window.open(ticketUrl, "_blank"); } catch {}
+    if (btnDirectCard) {
+      const targetUrl = ticketUrl || orderUrl;
+      btnDirectCard.href = targetUrl;
+      if (ticketUrl) {
+        try { window.open(ticketUrl, "_blank"); } catch {}
+      }
     }
   } else {
     // Modo PIX
-    if (boxPix) boxPix.hidden = false;
-    if (boxCard) boxCard.hidden = true;
+    if (boxPix) {
+      boxPix.hidden = false;
+      boxPix.style.display = "grid";
+    }
+    if (boxCard) {
+      boxCard.hidden = true;
+      boxCard.style.display = "none";
+    }
     if (subMsg) subMsg.textContent = "Escaneie o QR Code ou use o Copia e Cola. Assim que pagar, sua licença será liberada no WhatsApp!";
     if (statusPill) statusPill.textContent = "Aguardando Pagamento PIX";
 
@@ -407,8 +450,16 @@ async function processCheckout(e) {
     );
   }
 
-  if ($("#s-form")) $("#s-form").hidden = true;
-  if ($("#s-pix")) $("#s-pix").hidden = false;
+  const sForm = $("#s-form");
+  const sPix = $("#s-pix");
+  if (sForm) {
+    sForm.hidden = true;
+    sForm.style.display = "none";
+  }
+  if (sPix) {
+    sPix.hidden = false;
+    sPix.style.display = "block";
+  }
 
   // Polling automático: assim que o pagamento for aprovado, redireciona para a Área do Cliente
   if (accessToken) {
@@ -456,3 +507,22 @@ if (copyBtn) {
     }, 2500);
   };
 }
+
+// Botão Voltar para o Formulário a partir da tela de pagamento
+const btnBack = $("#btn-back-form");
+if (btnBack) {
+  btnBack.onclick = () => {
+    const sPix = $("#s-pix");
+    const sForm = $("#s-form");
+    if (sPix) {
+      sPix.hidden = true;
+      sPix.style.display = "none";
+    }
+    if (sForm) {
+      sForm.hidden = false;
+      sForm.style.display = "block";
+    }
+  };
+}
+
+

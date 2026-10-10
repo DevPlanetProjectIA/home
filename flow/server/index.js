@@ -399,6 +399,7 @@ eco.get('/orders/:id', (req, res) => {
     customerName: order.customer_name,
     customerEmail: order.customer_email,
     customerPhone: order.customer_phone,
+    paymentMethod: order.payment_method,
     status: order.status,
     qrCode: order.qr_code,
     qrCodeBase64: order.qr_code_base64,

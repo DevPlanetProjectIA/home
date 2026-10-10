@@ -71,35 +71,49 @@
 
       <!-- Estado: Pendente / Pagamento -->
       <div id="box-pending" hidden>
-        <h3 style="margin: 20px 0 10px;">Pagamento via Mercado Pago</h3>
-        <p class="muted">Escaneie o QR Code ou copie o código PIX abaixo. A confirmação é automática!</p>
-        <div class="pay" style="margin: 16px 0;">
-          <div id="qr-display" style="width:210px; height:210px; border:1px solid var(--line); border-radius:12px; display:flex; align-items:center; justify-content:center; background:#fff; overflow:hidden;"></div>
-          <div>
-            <label>Código PIX Copia e Cola:
-              <textarea id="pix-copy-code" readonly style="height:90px;"></textarea>
-            </label>
-            <div style="margin-top:8px;">
-              <button class="btn alt" id="btn-copy-pix" type="button">Copiar código PIX</button>
-              <button class="btn sm" id="btn-simulate" type="button" style="background:#64748b;" title="Simula a aprovação do webhook">Simular aprovação (Teste)</button>
+        <!-- Pendente PIX -->
+        <div id="box-pending-pix">
+          <h3 style="margin: 20px 0 10px;">Pagamento via PIX</h3>
+          <p class="muted">Escaneie o QR Code ou copie o código PIX abaixo. A confirmação é rápida e segura!</p>
+          <div class="pay" style="margin: 16px 0;">
+            <div id="qr-display" style="width:210px; height:210px; border:1px solid var(--line); border-radius:12px; display:flex; align-items:center; justify-content:center; background:#fff; overflow:hidden;"></div>
+            <div>
+              <label>Código PIX Copia e Cola:
+                <textarea id="pix-copy-code" readonly style="height:90px;"></textarea>
+              </label>
+              <div style="margin-top:8px;">
+                <button class="btn alt" id="btn-copy-pix" type="button">Copiar código PIX</button>
+                <button class="btn sm" id="btn-simulate" type="button" style="background:#64748b;" title="Simula a aprovação do webhook">Simular aprovação (Teste)</button>
+              </div>
+              <p class="muted sm" style="display:flex; align-items:center; gap:8px; margin-top:14px;">
+                <span class="spinner"></span> Aguardando confirmação do pagamento pelo banco...
+              </p>
             </div>
-            <div id="mp-checkout-btn-wrap" style="margin-top:14px;" hidden>
-              <a class="btn big" id="btn-mp-redirect" href="#" target="_blank" rel="noopener" style="background:#009ee3; display:inline-flex; align-items:center; gap:8px;">
-                <span>Pagar com Mercado Pago (Cartão / PIX) →</span>
-              </a>
-            </div>
-            <p class="muted sm" style="display:flex; align-items:center; gap:8px; margin-top:14px;">
-              <span class="spinner"></span> Aguardando confirmação do pagamento pelo Mercado Pago...
-            </p>
           </div>
+        </div>
+
+        <!-- Pendente Cartão de Crédito -->
+        <div id="box-pending-card" hidden style="background:rgba(0, 158, 227, 0.06); border:1px solid rgba(0, 158, 227, 0.25); border-radius:14px; padding:24px; text-align:center; margin:20px 0;">
+          <div style="width:48px; height:48px; border-radius:50%; background:rgba(0, 158, 227, 0.15); color:#009ee3; display:flex; align-items:center; justify-content:center; margin:0 auto 12px; font-size:1.4rem;">💳</div>
+          <h3 style="margin:0 0 8px; font-size:1.3rem;">Pagamento via Cartão de Crédito</h3>
+          <p class="muted" style="max-width:540px; margin:0 auto 16px;">Seu pedido foi registrado no Mercado Pago. Caso ainda não tenha concluído o pagamento na tela do Mercado Pago, clique no botão abaixo para finalizar com cartão em até 12x.</p>
+          <div id="mp-checkout-btn-wrap" style="margin:16px 0;">
+            <a class="btn big" id="btn-mp-redirect" href="#" target="_blank" rel="noopener" style="background:#009ee3; display:inline-flex; align-items:center; gap:8px;">
+              <span>Concluir Pagamento no Mercado Pago (Cartão) →</span>
+            </a>
+          </div>
+          <p class="muted sm" style="display:flex; align-items:center; justify-content:center; gap:8px; margin-top:12px;">
+            <span class="spinner"></span> Aguardando retorno da operadora do cartão...
+          </p>
         </div>
       </div>
 
       <!-- Estado: Aprovado / Processando -->
-      <div id="box-processing" hidden style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:14px; padding:22px; text-align:center; margin:20px 0;">
-        <div class="spinner" style="width:30px;height:30px;border-width:3px; border-top-color:#2563eb;"></div>
-        <h3 style="color:#1e40af; margin:12px 0 6px;">Pagamento Confirmado!</h3>
-        <p class="muted" style="margin:0;">Estamos gerando e liberando sua licença automaticamente. Isso leva apenas alguns segundos...</p>
+      <div id="box-processing" hidden style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:14px; padding:24px; text-align:center; margin:20px 0;">
+        <div class="spinner" style="width:32px;height:32px;border-width:3px; border-top-color:#2563eb;"></div>
+        <h3 style="color:#1e40af; margin:14px 0 8px; font-size:1.3rem;">Pagamento Confirmado! 🎉</h3>
+        <p style="color:#1e293b; font-size:1rem; font-weight:600; margin:0 0 6px;">Sua licença está em processamento e será entregue em até 24 horas.</p>
+        <p class="muted sm" style="margin:0;">O envio é feito automaticamente no seu WhatsApp e também será exibido nesta página assim que liberado.</p>
       </div>
 
       <!-- Estado: Entregue (Licença Liberada) -->
@@ -218,29 +232,41 @@ function renderOrder(o) {
     badge.innerHTML = `<span class="spinner" style="width:14px;height:14px;border-width:2px;"></span> Pagamento Aprovado — Gerando Licença`;
     procBox.hidden = false;
   } else {
-    badge.className = "status-badge status-pending";
-    badge.innerHTML = `<span class="pulse-dot"></span> Aguardando Pagamento (PIX)`;
     pendingBox.hidden = false;
+    const isCard = o.paymentMethod === 'credit_card' || o.paymentMethod === 'card';
 
-    // QR Code
-    const qrEl = document.getElementById("qr-display");
-    if (o.qrCodeBase64) {
-      qrEl.innerHTML = `<img src="data:image/png;base64,${o.qrCodeBase64}" style="width:100%;height:100%;object-fit:contain;" alt="QR Code PIX">`;
-    } else if (typeof QR !== 'undefined' && o.qrCode) {
-      qrEl.innerHTML = QR.svg(o.qrCode);
+    const boxPendingPix = document.getElementById("box-pending-pix");
+    const boxPendingCard = document.getElementById("box-pending-card");
+
+    if (isCard) {
+      badge.className = "status-badge status-pending";
+      badge.innerHTML = `<span class="pulse-dot"></span> Aguardando Pagamento (Cartão)`;
+      if (boxPendingPix) boxPendingPix.hidden = true;
+      if (boxPendingCard) boxPendingCard.hidden = false;
+
+      const mpBtn = document.getElementById("btn-mp-redirect");
+      if (mpBtn && o.ticketUrl) {
+        mpBtn.href = o.ticketUrl;
+        document.getElementById("mp-checkout-btn-wrap").hidden = false;
+      }
     } else {
-      qrEl.textContent = "QR Code indisponível";
-    }
+      badge.className = "status-badge status-pending";
+      badge.innerHTML = `<span class="pulse-dot"></span> Aguardando Pagamento (PIX)`;
+      if (boxPendingPix) boxPendingPix.hidden = false;
+      if (boxPendingCard) boxPendingCard.hidden = true;
 
-    document.getElementById("pix-copy-code").value = o.qrCode || "";
+      // QR Code
+      const qrEl = document.getElementById("qr-display");
+      if (o.qrCodeBase64) {
+        qrEl.innerHTML = `<img src="data:image/png;base64,${o.qrCodeBase64}" style="width:100%;height:100%;object-fit:contain;" alt="QR Code PIX">`;
+      } else if (typeof QR !== 'undefined' && o.qrCode) {
+        qrEl.innerHTML = QR.svg(o.qrCode);
+      } else {
+        qrEl.textContent = "QR Code indisponível";
+      }
 
-    const mpWrap = document.getElementById("mp-checkout-btn-wrap");
-    const mpBtn = document.getElementById("btn-mp-redirect");
-    if (o.ticketUrl && o.ticketUrl.includes("mercadopago")) {
-      mpBtn.href = o.ticketUrl;
-      mpWrap.hidden = false;
-    } else {
-      mpWrap.hidden = true;
+      const pixCodeEl = document.getElementById("pix-copy-code");
+      if (pixCodeEl) pixCodeEl.value = o.qrCode || "";
     }
   }
 

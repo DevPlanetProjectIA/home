@@ -36,6 +36,7 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
+[hidden] { display: none !important; }
 html { scroll-behavior: smooth; }
 body {
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
@@ -890,10 +891,8 @@ footer {
 /* ===== MODAL & CHECKOUT DIALOGS ===== */
 dialog {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  margin: 0 !important;
+  inset: 0;
+  margin: auto;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 20px;
   padding: 0;
@@ -905,9 +904,30 @@ dialog {
   z-index: 1000;
   overflow: hidden;
 }
+dialog:not([open]) {
+  display: none !important;
+}
+dialog[open] {
+  animation: dlgFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
 dialog::backdrop {
   background: rgba(4, 7, 15, 0.82);
   backdrop-filter: blur(8px);
+  animation: backdropFadeIn 0.22s ease-out;
+}
+@keyframes dlgFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes backdropFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 .dlg {
   padding: 26px;
@@ -1188,6 +1208,43 @@ textarea.pix-textarea {
   .bar { height: auto; padding: 12px 0; flex-wrap: wrap; }
   .search-wrap { order: 3; max-width: 100%; width: 100%; }
   .footer-grid { grid-template-columns: 1fr; gap: 30px; }
-  .pay-box { grid-template-columns: 1fr; justify-items: center; }
+  .pay-box { grid-template-columns: 1fr; justify-items: center; text-align: center; }
   .guarantee-card { flex-direction: column; text-align: center; }
+  dialog {
+    width: min(640px, 95vw);
+    max-height: 92vh;
+  }
+  .dlg {
+    padding: 20px 16px;
+    max-height: 92vh;
+  }
+  .dlg-pricing-box {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+  .dlg-pricing-box button {
+    width: 100%;
+    min-width: unset;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-grid {
+    grid-template-columns: 1fr;
+  }
+  .hero h1 {
+    font-size: 1.85rem;
+  }
+  .hero-cta-row {
+    flex-direction: column;
+  }
+  .hero-cta-row .btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .qr-frame {
+    width: 170px;
+    height: 170px;
+  }
 }
