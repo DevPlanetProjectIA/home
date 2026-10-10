@@ -1,19 +1,27 @@
-# Deploy do Flow no Render (https://render.com): New > Blueprint > selecione este repositório.
 services:
   - type: web
-    name: flow
-    runtime: docker
-    dockerfilePath: ./flow/Dockerfile
-    dockerContext: ./flow
-    plan: starter
+    name: devplanet-store-api
+    runtime: node
+    rootDir: flow/server
+    plan: free
+    region: ohio
+    buildCommand: npm install
+    startCommand: node index.js
+    healthCheckPath: /api/health
     envVars:
+      - key: NODE_VERSION
+        value: 22.12.0
+      - key: PORT
+        value: 3000
       - key: ALLOWED_ORIGIN
-        value: https://devplanetprojectia.github.io
-      - key: COOKIE_SECURE
-        value: "1"
-      - key: DATA_DIR
-        value: /data
-    disk:
-      name: flow-data
-      mountPath: /data
-      sizeGB: 1
+        value: "*"
+      - key: MERCADOPAGO_ACCESS_TOKEN
+        sync: false
+      - key: MERCADOPAGO_CLIENT_SECRET
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_ADMIN_CHAT_ID
+        sync: false
+      - key: PUBLIC_BACKEND_URL
+        sync: false

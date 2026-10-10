@@ -77,6 +77,9 @@ const app = express();
 app.use(express.json({ limit: '5mb' }));
 app.use(cookieParser());
 
+// Healthcheck para Render / Monitoramento Uptime
+app.get('/api/health', (_req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
+
 const sign = (u) => jwt.sign({ id: u.id }, SECRET, { expiresIn: '30d' });
 const setCookie = (res, token) =>
   res.cookie('token', token, { httpOnly: true, sameSite: 'lax', maxAge: 30 * 864e5, secure: process.env.COOKIE_SECURE === '1' });
