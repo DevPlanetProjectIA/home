@@ -3,7 +3,6 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
-import { DatabaseSync } from 'node:sqlite';
 import path from 'node:path';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
@@ -11,6 +10,16 @@ import { fileURLToPath } from 'node:url';
 import { fulfillOrderLicense } from './licenseService.js';
 import { startTelegramPolling, notifyAdminNewOrder } from './telegramService.js';
 import { startWhatsAppService, getWhatsAppStatus, sendAutoWhatsAppMessage } from './whatsappService.js';
+
+// Suporte universal para SQLite (Node 18, 20 e 22+)
+let Database;
+try {
+  const sqlite = await import('node:sqlite');
+  Database = sqlite.DatabaseSync;
+} catch {
+  const better = await import('better-sqlite3');
+  Database = better.default;
+}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
@@ -25,7 +34,7 @@ if (!SECRET) {
   else { SECRET = crypto.randomBytes(32).toString('hex'); fs.writeFileSync(f, SECRET); }
 }
 
-const db = new DatabaseSync(path.join(DATA_DIR, 'app.db'));
+const db = new Database(path.join(DATA_DIR, 'app.db'));
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
