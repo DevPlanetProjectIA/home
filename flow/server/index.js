@@ -11,15 +11,7 @@ import { fulfillOrderLicense } from './licenseService.js';
 import { startTelegramPolling, notifyAdminNewOrder } from './telegramService.js';
 import { startWhatsAppService, getWhatsAppStatus, sendAutoWhatsAppMessage } from './whatsappService.js';
 
-// Suporte universal para SQLite (Node 18, 20 e 22+)
-let Database;
-try {
-  const sqlite = await import('node:sqlite');
-  Database = sqlite.DatabaseSync;
-} catch {
-  const better = await import('better-sqlite3');
-  Database = better.default;
-}
+import Database from 'better-sqlite3';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
