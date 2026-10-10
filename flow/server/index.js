@@ -11,7 +11,7 @@ import { fulfillOrderLicense } from './licenseService.js';
 import { startTelegramPolling, notifyAdminNewOrder } from './telegramService.js';
 import { startWhatsAppService, getWhatsAppStatus, sendAutoWhatsAppMessage } from './whatsappService.js';
 
-import Database from 'better-sqlite3';
+import { initDatabase } from './db.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
@@ -26,7 +26,7 @@ if (!SECRET) {
   else { SECRET = crypto.randomBytes(32).toString('hex'); fs.writeFileSync(f, SECRET); }
 }
 
-const db = new Database(path.join(DATA_DIR, 'app.db'));
+const db = await initDatabase(path.join(DATA_DIR, 'app.db'));
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
