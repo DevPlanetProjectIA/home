@@ -4,9 +4,15 @@ import crypto from 'node:crypto';
 // Instruções padrão de ativação por produto
 export const PRODUCT_INSTRUCTIONS = {
   'google-ai-pro-18m': {
-    name: 'Google AI Pro — 18 meses',
+    name: 'Google AI Pro — 18 meses (5 TB)',
     guide: `1. Acesse o Google Workspace / Gemini com a sua conta Google.\n` +
-           `2. Utilize o código de licença / convite fornecido abaixo para ativar seu período de 18 meses com 5 TB de armazenamento.\n` +
+           `2. Utilize o código de licença / convite fornecido abaixo para ativar seu período de 18 meses com 5 TB de armazenamento no Google Drive.\n` +
+           `3. O saldo mensal de 1.000 créditos de IA será disponibilizado automaticamente no seu painel.`
+  },
+  'google-ai-pro': {
+    name: 'Google AI Pro — 18 meses (5 TB)',
+    guide: `1. Acesse o Google Workspace / Gemini com a sua conta Google.\n` +
+           `2. Utilize o código de licença / convite fornecido abaixo para ativar seu período de 18 meses com 5 TB de armazenamento no Google Drive.\n` +
            `3. O saldo mensal de 1.000 créditos de IA será disponibilizado automaticamente no seu painel.`
   },
   'duolingo-super-12m': {
@@ -15,7 +21,19 @@ export const PRODUCT_INSTRUCTIONS = {
            `2. Acesse seu perfil > Configurações > Ativar Código Promocional / Plano Super.\n` +
            `3. Insira o código da sua licença para desbloquear os 12 meses sem anúncios e com vidas infinitas.`
   },
+  'duolingo-super': {
+    name: 'Duolingo Super — 12 meses',
+    guide: `1. Abra o aplicativo do Duolingo ou acesse https://www.duolingo.com.\n` +
+           `2. Acesse seu perfil > Configurações > Ativar Código Promocional / Plano Super.\n` +
+           `3. Insira o código da sua licença para desbloquear os 12 meses sem anúncios e com vidas infinitas.`
+  },
   'canva-pro-12m': {
+    name: 'Canva Pro — 12 meses',
+    guide: `1. Acesse https://www.canva.com e faça login com seu e-mail.\n` +
+           `2. Acesse o link de convite VIP ou insira a chave da equipe enviada para você.\n` +
+           `3. Sua conta será promovida para o status PRO com todos os recursos desbloqueados por 12 meses.`
+  },
+  'canva-pro': {
     name: 'Canva Pro — 12 meses',
     guide: `1. Acesse https://www.canva.com e faça login com seu e-mail.\n` +
            `2. Acesse o link de convite VIP ou insira a chave da equipe enviada para você.\n` +
