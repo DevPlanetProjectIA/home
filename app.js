@@ -50,6 +50,28 @@ try {
     triggerSalesToast();
     setInterval(triggerSalesToast, 16000);
   }, 4000);
+
+  // Detecção Automática do Código OAuth do Mercado Livre (?code=TG-...)
+  const urlParams = new URLSearchParams(window.location.search);
+  const mlAuthCode = urlParams.get('code');
+  if (mlAuthCode) {
+    const banner = document.createElement('div');
+    banner.style.cssText = 'position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:99999;background:#18181b;border:2px solid #3b82f6;color:#fff;padding:16px 24px;border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,0.8);max-width:90%;text-align:center;font-family:sans-serif;';
+    banner.innerHTML = `
+      <div style="font-size:1.1rem;font-weight:700;color:#60a5fa;margin-bottom:6px;">🎉 Código de Autorização Mercado Livre Recebido!</div>
+      <div style="font-size:0.88rem;color:#cbd5e1;margin-bottom:12px;">Copie o código abaixo e envie no chat para concluir a publicação automática dos anúncios:</div>
+      <div style="display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;">
+        <input type="text" id="ml-code-input" value="${esc(mlAuthCode)}" readonly style="padding:8px 12px;background:#09090b;border:1px solid #3f3f46;color:#22c55e;font-family:monospace;font-size:0.95rem;border-radius:6px;width:280px;text-align:center;">
+        <button id="copy-ml-code-btn" style="padding:8px 16px;background:#2563eb;color:#fff;border:none;border-radius:6px;font-weight:600;cursor:pointer;">📋 Copiar Código</button>
+      </div>
+    `;
+    document.body.appendChild(banner);
+    document.getElementById('copy-ml-code-btn')?.addEventListener('click', () => {
+      navigator.clipboard.writeText(mlAuthCode);
+      const btn = document.getElementById('copy-ml-code-btn');
+      if (btn) btn.textContent = '✅ Copiado!';
+    });
+  }
 } catch (e) {
   console.warn("Config initialization:", e);
 }

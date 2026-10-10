@@ -17,8 +17,8 @@ if (!code) {
   process.exit(1);
 }
 
-const CLIENT_ID = '8087191916005638';
-const CLIENT_SECRET = 'ib9djM9jOQ8wDLpA6v7YXICgJ6fSPiYp';
+const CLIENT_ID = '7763221096235181';
+const CLIENT_SECRET = '23rfiy0WKZtxM3vHj0urRFiVvXBNSejq';
 const REDIRECT_URI = 'https://devplanetprojectia.github.io/home/';
 
 const postData = JSON.stringify({
@@ -67,7 +67,7 @@ const req = https.request(options, (res) => {
         // Executa automaticamente a publicação dos anúncios
         console.log('🚀 Publicando os anúncios agora...');
         const publisherScript = path.join(__dirname, 'publish-mercadolivre.cjs');
-        execSync(`node "${publisherScript}" "${data.access_token}"`, { stdio: 'inherit' });
+        execSync(`"${process.execPath}" "${publisherScript}" "${data.access_token}"`, { stdio: 'inherit' });
       } else {
         console.error('❌ Falha ao obter token:', data);
       }
