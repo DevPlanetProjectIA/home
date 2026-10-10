@@ -22,6 +22,42 @@ const ML_TOKEN = tokenArg || tokenEnv || process.env.ML_ACCESS_TOKEN;
 
 const PRODUCTS_TO_PUBLISH = [
   {
+    sku: "GOOG-AI-18M",
+    family_name: "Google Ai Pro 18 Meses Gemini Advanced 2tb",
+    category_id: "MLB1733", // Softwares de Escritório
+    price: 50.00,
+    currency_id: "BRL",
+    available_quantity: 50,
+    buying_mode: "buy_it_now",
+    listing_type_id: "gold_special",
+    condition: "new",
+    pictures: [
+      { source: "https://devplanetprojectia.github.io/home/img/promo-google-ai-pro.jpg" }
+    ],
+    attributes: [
+      { id: "BRAND", value_name: "Google" },
+      { id: "OFFICE_SOFTWARE_NAME", value_name: "Google AI Pro" },
+      { id: "VERSION", value_name: "Gemini Advanced" },
+      { id: "FORMAT", value_name: "Digital" },
+      { id: "GTIN", value_name: "7898956241058" }
+    ],
+    shipping: {
+      mode: "not_specified",
+      local_pick_up: true,
+      free_shipping: false
+    },
+    sale_terms: [
+      { id: "WARRANTY_TYPE", value_name: "Garantia do vendedor" },
+      { id: "WARRANTY_TIME", value_name: "7 dias" }
+    ],
+    description: 
+      "Assinatura Oficial Google AI Pro (Gemini Advanced) por 18 meses.\n\n" +
+      "- Acesso ilimitado ao Gemini 1.5 Pro com janela de contexto de 1 milhão de tokens\n" +
+      "- 2 TB de armazenamento em nuvem de alta velocidade no Google One\n" +
+      "- Integração com Google Workspace (Gmail, Docs, Sheets)\n\n" +
+      "Garantia de 7 dias com entrega rápida e ativação direta via chat/WhatsApp!"
+  },
+  {
     sku: "MS-365-12M",
     family_name: "Microsoft 365 12 Meses 1tb Nuvem",
     category_id: "MLB1733", // Softwares de Escritório
@@ -169,6 +205,42 @@ const PRODUCTS_TO_PUBLISH = [
       "- Até 3 telas simultâneas e download liberado para assistir offline\n" +
       "- Compatível com Smart TVs, computadores, celulares e tablets\n\n" +
       "Garantia de 7 dias com entrega rápida e suporte completo via chat/WhatsApp!"
+  },
+  {
+    sku: "DUO-SUP-12M",
+    family_name: "Duolingo Super 12 Meses Vidas Infinitas Oficial",
+    category_id: "MLB421328", // Gift Cards / Assinaturas
+    price: 40.00,
+    currency_id: "BRL",
+    available_quantity: 50,
+    buying_mode: "buy_it_now",
+    listing_type_id: "gold_special",
+    condition: "new",
+    pictures: [
+      { source: "https://devplanetprojectia.github.io/home/img/promo-duolingo-super.jpg" }
+    ],
+    attributes: [
+      { id: "BRAND", value_name: "Duolingo" },
+      { id: "PREPAID_CARD_TYPE", value_id: "52275405", value_name: "Assinatura" },
+      { id: "FORMAT", value_id: "2132699", value_name: "Digital" },
+      { id: "REGION", value_id: "1233470", value_name: "Brasil" },
+      { id: "GTIN", value_name: "7898956241065" }
+    ],
+    shipping: {
+      mode: "not_specified",
+      local_pick_up: true,
+      free_shipping: false
+    },
+    sale_terms: [
+      { id: "WARRANTY_TYPE", value_name: "Garantia do vendedor" },
+      { id: "WARRANTY_TIME", value_name: "7 dias" }
+    ],
+    description: 
+      "Assinatura Oficial Duolingo Super por 12 meses.\n\n" +
+      "- Vidas infinitas: pratique sem medo de errar\n" +
+      "- Zero anúncios comerciais durante os exercícios\n" +
+      "- Prática personalizada e revisão inteligente dos seus erros\n\n" +
+      "Garantia de 7 dias com ativação rápida e suporte completo via chat/WhatsApp!"
   }
 ];
 
