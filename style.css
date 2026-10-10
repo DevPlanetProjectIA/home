@@ -1598,3 +1598,120 @@ textarea.pix-textarea {
     padding: 16px 12px;
   }
 }
+
+/* ===== WIDGET FLUTUANTE WHATSAPP (ALTA CONVERSÃO) ===== */
+.wa-float-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #25D366;
+  color: #fff;
+  text-decoration: none;
+  padding: 12px 20px 12px 16px;
+  border-radius: 999px;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.92rem;
+  box-shadow: 0 8px 24px rgba(37, 211, 102, 0.4), 0 2px 8px rgba(0,0,0,0.3);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+.wa-float-btn:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 12px 30px rgba(37, 211, 102, 0.55);
+  color: #fff;
+}
+.wa-float-icon-wrap {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.wa-float-pulse {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #25D366;
+  opacity: 0.8;
+  animation: wa-pulse-ring 2s infinite cubic-bezier(0.25, 1, 0.5, 1);
+}
+@keyframes wa-pulse-ring {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+@media (max-width: 600px) {
+  .wa-float-btn {
+    bottom: 16px;
+    right: 16px;
+    padding: 10px 16px 10px 12px;
+    font-size: 0.82rem;
+  }
+}
+
+/* ===== NOTIFICAÇÃO DE PROVA SOCIAL AO VIVO ===== */
+.live-sales-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 9998;
+  background: rgba(14, 18, 28, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 330px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  transform: translateY(120px);
+  opacity: 0;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+.live-sales-toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+.live-sales-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: #fff;
+  flex-shrink: 0;
+}
+.live-sales-content {
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+.live-sales-content b {
+  color: #fff;
+  display: block;
+}
+.live-sales-time {
+  font-size: 0.72rem;
+  color: var(--green);
+  font-weight: 600;
+}
+@media (max-width: 768px) {
+  .live-sales-toast {
+    display: none; /* Não sobrepõe tela pequena no mobile */
+  }
+}
+

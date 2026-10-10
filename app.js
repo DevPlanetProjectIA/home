@@ -18,6 +18,38 @@ try {
   const waSupportMsg = `Olá! Gostaria de tirar uma dúvida sobre as licenças da ${CONFIG.storeName}.`;
   if ($("#header-help")) $("#header-help").href = wa(waSupportMsg);
   if ($("#footer-wa")) $("#footer-wa").href = wa(waSupportMsg);
+  if ($("#wa-float")) $("#wa-float").href = wa(waSupportMsg);
+
+  // Prova Social de Vendas Recentes (Gera Confiança e Urgência)
+  const SALES_FEED = [
+    { name: "Carlos", city: "São Paulo/SP", product: "Microsoft 365 Premium — 12 meses", time: "há 4 minutos" },
+    { name: "Juliana", city: "Rio de Janeiro/RJ", product: "Lovable Lite — 12 meses", time: "há 11 minutos" },
+    { name: "Felipe", city: "Belo Horizonte/MG", product: "Google AI Pro — 18 meses", time: "há 18 minutos" },
+    { name: "Mariana", city: "Curitiba/PR", product: "Adobe Express — 12 meses", time: "há 25 minutos" },
+    { name: "Rafael", city: "Porto Alegre/RS", product: "Amazon Prime Video — 6 meses", time: "há 34 minutos" },
+    { name: "Beatriz", city: "Brasília/DF", product: "Duolingo Super — 12 meses", time: "há 42 minutos" }
+  ];
+  let salesFeedIdx = 0;
+  function triggerSalesToast() {
+    const toast = $("#live-sales-toast");
+    if (!toast) return;
+    const item = SALES_FEED[salesFeedIdx % SALES_FEED.length];
+    salesFeedIdx++;
+    const av = $("#toast-avatar");
+    const tit = $("#toast-title");
+    const pr = $("#toast-product");
+    const tm = $("#toast-time");
+    if (av) av.textContent = item.name[0];
+    if (tit) tit.textContent = `${item.name} (${item.city}) comprou`;
+    if (pr) pr.textContent = item.product;
+    if (tm) tm.textContent = `✓ ${item.time}`;
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 5000);
+  }
+  setTimeout(() => {
+    triggerSalesToast();
+    setInterval(triggerSalesToast, 16000);
+  }, 4000);
 } catch (e) {
   console.warn("Config initialization:", e);
 }
