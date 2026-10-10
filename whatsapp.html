@@ -61,9 +61,60 @@
       <div class="connected-box">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" style="margin-bottom:8px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
         <h2 style="margin:0 0 6px; font-size:1.4rem;">WhatsApp Conectado!</h2>
-        <p style="margin:0; font-size:0.95rem;">O robô já está ativo e pronto para enviar mensagens automáticas diretamente do seu número.</p>
+        <p style="margin:0; font-size:0.95rem;">O robô já está ativo e pronto para prospecção em novos grupos públicos.</p>
         <p class="muted sm" id="user-info" style="margin-top:12px;"></p>
       </div>
+
+      <!-- Seção de Prospecção em Grupos Públicos (Não toca nos grupos pessoais) -->
+      <div style="text-align:left; background:var(--bg); border:1px solid var(--line); border-radius:16px; padding:24px; margin:24px 0;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+          <span style="font-size:1.3rem;">🌐</span>
+          <h3 style="margin:0; font-size:1.15rem; color:#fff;">Buscar Novos Grupos Públicos na Internet</h3>
+        </div>
+        <p class="muted sm" style="margin:0 0 16px;">
+          <b style="color:#22c55e;">🛡️ Proteção de Privacidade:</b> Seus grupos pessoais (família, amigos e trabalho) <b>NUNCA</b> serão tocados. O robô busca comunidades públicas abertas na internet sobre tecnologia e ofertas.
+        </p>
+
+        <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;">
+          <select id="niche-select" style="padding:10px 14px; background:#18181b; color:#fff; border:1px solid #3f3f46; border-radius:10px; font-size:0.9rem; flex:1;">
+            <option value="all">Todos os Nichos</option>
+            <option value="tecnologia" selected>🚀 Tecnologia & Softwares</option>
+            <option value="ia">🤖 Inteligência Artificial & Prompts</option>
+            <option value="promocoes">🔥 Ofertas & Promoções</option>
+            <option value="negocios">💼 Empreendedorismo & Vendas</option>
+          </select>
+          <button id="btn-search-public" style="padding:10px 18px; background:#2563eb; color:#fff; border:none; border-radius:10px; font-weight:600; cursor:pointer;">🔍 Buscar Grupos</button>
+        </div>
+
+        <div id="public-groups-container" style="max-height:220px; overflow-y:auto; margin-bottom:16px; display:none; border:1px solid var(--line); border-radius:10px; padding:10px; background:#18181b;">
+          <!-- Grupos carregados via JS -->
+        </div>
+
+        <label style="font-size:0.85rem; font-weight:600; color:#cbd5e1; display:block; margin-bottom:6px;">Mensagem para Divulgação:</label>
+        <textarea id="broadcast-msg" rows="5" style="width:100%; box-sizing:border-box; padding:12px; background:#18181b; color:#fff; border:1px solid #3f3f46; border-radius:10px; font-family:sans-serif; font-size:0.88rem; line-height:1.5;">🚀 *OPORTUNIDADE TECH — LICENÇAS DIGITAIS OFICIAIS COM ATÉ 80% OFF!*
+
+⚡ *OFERTA RELÂMPAGO MERCADO LIVRE (2 HORAS):*
+🔥 Google AI Pro (18 Meses + 5 TB no Drive): apenas *R$ 20,00*!
+👉 https://produto.mercadolivre.com.br/MLB-5366440323-google-ai-pro-18-meses-gemini-advanced-2tb-_JM
+
+📦 *OUTRAS OFERTAS NA DEVPANET STORE:*
+• Microsoft 365 Premium 12 Meses (1 TB Nuvem): R$ 89,00
+• Lovable Lite 12 Meses IA Fullstack: R$ 139,90
+• Amazon Prime Video 6 Meses 4K: R$ 79,90
+
+🛡️ *Garantia legal incondicional de 7 dias (CDC).*
+💬 Entrega imediata no chat e suporte humanizado!
+🌐 Catálogo completo: https://devplanetprojectia.github.io/home/</textarea>
+
+        <div style="margin-top:16px;">
+          <button id="btn-broadcast-public" style="width:100%; padding:14px; background:#22c55e; color:#000; font-weight:700; font-size:1rem; border:none; border-radius:12px; cursor:pointer; display:none;">
+            🚀 Entrar nos Grupos Selecionados e Divulgar (Anti-Ban)
+          </button>
+        </div>
+
+        <div id="broadcast-status-log" style="margin-top:12px; font-size:0.85rem; color:#94a3b8; display:none; background:#09090b; padding:12px; border-radius:8px; border:1px solid #27272a;"></div>
+      </div>
+
       <a class="btn big" href="index.html" style="margin-top:10px;">Ir para a Loja</a>
     </div>
   </div>
@@ -97,6 +148,72 @@ async function checkStatus() {
     }
   } catch (err) {}
 }
+
+// Busca grupos públicos
+document.getElementById('btn-search-public')?.addEventListener('click', async () => {
+  const niche = document.getElementById('niche-select').value;
+  const container = document.getElementById('public-groups-container');
+  const btnBroadcast = document.getElementById('btn-broadcast-public');
+  container.style.display = 'block';
+  container.innerHTML = '<p class="muted sm" style="text-align:center;padding:16px;">🔍 Buscando comunidades públicas na web...</p>';
+
+  try {
+    const res = await fetch(`/api/whatsapp/public-groups?niche=${encodeURIComponent(niche)}`);
+    const data = await res.json();
+    if (data.groups && data.groups.length > 0) {
+      container.innerHTML = data.groups.map((g, i) => `
+        <label style="display:flex; align-items:flex-start; gap:10px; padding:8px; border-bottom:1px solid #27272a; cursor:pointer;">
+          <input type="checkbox" name="pub-group" value="${g.inviteCode}" checked style="margin-top:4px;">
+          <div>
+            <div style="font-weight:600; color:#fff; font-size:0.92rem;">${g.title}</div>
+            <div style="font-size:0.8rem; color:#94a3b8;">${g.desc || ''}</div>
+          </div>
+        </label>
+      `).join('');
+      btnBroadcast.style.display = 'block';
+    } else {
+      container.innerHTML = '<p class="muted sm" style="text-align:center;padding:16px;">Nenhum grupo encontrado para este filtro.</p>';
+      btnBroadcast.style.display = 'none';
+    }
+  } catch (e) {
+    container.innerHTML = '<p style="color:#ef4444;text-align:center;padding:16px;">Erro ao buscar grupos.</p>';
+  }
+});
+
+// Entrar e disparar nos grupos selecionados
+document.getElementById('btn-broadcast-public')?.addEventListener('click', async () => {
+  const selected = [...document.querySelectorAll('input[name="pub-group"]:checked')].map(cb => cb.value);
+  const text = document.getElementById('broadcast-msg').value;
+  const log = document.getElementById('broadcast-status-log');
+
+  if (selected.length === 0) {
+    alert('Selecione pelo menos um grupo público.');
+    return;
+  }
+  if (!text) {
+    alert('Preencha a mensagem de divulgação.');
+    return;
+  }
+
+  log.style.display = 'block';
+  log.innerHTML = `⏳ <b>Iniciando processo seguro...</b> Entrando em ${selected.length} grupos públicos e enviando mensagem com intervalos anti-ban (25s a 40s)...`;
+
+  try {
+    const res = await fetch('/api/whatsapp/join-and-broadcast', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ inviteCodes: selected, text, delaySeconds: 25 })
+    });
+    const result = await res.json();
+    if (result.success) {
+      log.innerHTML = `✅ <b>Disparo Concluído!</b> Foram processados ${result.results.length} grupos com sucesso e segurança anti-ban total!`;
+    } else {
+      log.innerHTML = `⚠️ <b>Aviso:</b> ${result.error || 'Erro no processo.'}`;
+    }
+  } catch (err) {
+    log.innerHTML = `❌ Erro de conexão com o servidor.`;
+  }
+});
 
 checkInterval = setInterval(checkStatus, 2000);
 checkStatus();

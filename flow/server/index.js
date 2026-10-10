@@ -9,7 +9,7 @@ import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { fulfillOrderLicense } from './licenseService.js';
 import { startTelegramPolling, notifyAdminNewOrder } from './telegramService.js';
-import { startWhatsAppService, getWhatsAppStatus, sendAutoWhatsAppMessage, fetchWhatsAppGroups, broadcastToWhatsAppGroups } from './whatsappService.js';
+import { startWhatsAppService, getWhatsAppStatus, sendAutoWhatsAppMessage, fetchWhatsAppGroups, broadcastToWhatsAppGroups, searchPublicWhatsAppGroups, joinAndBroadcastPublicGroups } from './whatsappService.js';
 
 import { initDatabase } from './db.js';
 
@@ -510,6 +510,23 @@ app.post('/api/whatsapp/broadcast', async (req, res) => {
     return res.status(400).json({ error: 'Informe os grupos (groupJids) e o texto da mensagem.' });
   }
   const result = await broadcastToWhatsAppGroups(groupJids, text, delaySeconds || 20);
+  res.json(result);
+});
+
+// 10. Buscar Grupos Públicos da Internet por Nicho (Prospecção de Novos Grupos)
+app.get('/api/whatsapp/public-groups', async (req, res) => {
+  const { niche } = req.query;
+  const result = await searchPublicWhatsAppGroups(niche || 'all');
+  res.json(result);
+});
+
+// 11. Entrar em Novos Grupos Públicos e Disparar Mensagem com Anti-Ban
+app.post('/api/whatsapp/join-and-broadcast', async (req, res) => {
+  const { inviteCodes, text, delaySeconds } = req.body || {};
+  if (!Array.isArray(inviteCodes) || inviteCodes.length === 0 || !text) {
+    return res.status(400).json({ error: 'Informe os links/códigos dos grupos e o texto da mensagem.' });
+  }
+  const result = await joinAndBroadcastPublicGroups(inviteCodes, text, delaySeconds || 25);
   res.json(result);
 });
 
