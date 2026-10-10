@@ -437,6 +437,16 @@ async function processCheckout(e) {
     }
     const codeEl = $("#code");
     if (codeEl) codeEl.value = code;
+
+    const wrapMpPix = $("#wrap-mp-pix-btn");
+    const btnDirectPix = $("#btn-mp-pix-direct");
+    if (ticketUrl && btnDirectPix) {
+      btnDirectPix.href = ticketUrl;
+      if (wrapMpPix) wrapMpPix.hidden = false;
+      try { window.open(ticketUrl, "_blank"); } catch {}
+    } else if (wrapMpPix) {
+      wrapMpPix.hidden = true;
+    }
   }
 
   const paidWa = $("#paid");
