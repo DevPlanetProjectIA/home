@@ -9,14 +9,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=3.0">
 </head>
 <body>
 
 <!-- Faixa de Oferta Relâmpago -->
 <div class="announcement">
-  <span class="badge-deal">⚡ Oferta Especial</span>
-  <span>Licenças originais com até <b>80% OFF</b> · Entrega em até 24 horas após a confirmação do pagamento diretamente no seu WhatsApp!</span>
+  <span class="badge-deal">⚡ OFERTA</span>
+  <span>Licenças originais com até <b>80% OFF</b> · Entrega em até 24h no WhatsApp!</span>
 </div>
 
 <!-- Header Principal -->
@@ -30,26 +30,26 @@
       </div>
     </a>
 
+    <!-- Navegação e Ações -->
+    <nav class="nav-actions">
+      <a href="#produtos" class="nav-link desktop-only">Catálogo</a>
+      <a href="#vantagens" class="nav-link desktop-only">Vantagens</a>
+      <a href="#faq" class="nav-link desktop-only">Dúvidas</a>
+      <a href="pedido.html" class="btn-client">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Pedidos</span>
+      </a>
+      <a class="btn-wa-header" id="header-help" target="_blank" rel="noopener">
+        <span class="pulse-green"></span>
+        <span>WhatsApp</span>
+      </a>
+    </nav>
+
     <!-- Barra de Busca -->
     <div class="search-wrap">
       <span class="search-icon">🔍</span>
       <input type="search" class="search-input" id="search-products" placeholder="Buscar ferramentas, IA, idiomas...">
     </div>
-
-    <!-- Navegação e Ações -->
-    <nav class="nav-actions">
-      <a href="#produtos" class="nav-link">Catálogo</a>
-      <a href="#vantagens" class="nav-link">Vantagens</a>
-      <a href="#faq" class="nav-link">Dúvidas</a>
-      <a href="pedido.html" class="btn-client">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <span>Meus Pedidos</span>
-      </a>
-      <a class="btn-wa-header" id="header-help" target="_blank" rel="noopener">
-        <span class="pulse-green"></span>
-        <span>Suporte WhatsApp</span>
-      </a>
-    </nav>
   </div>
 </header>
 
@@ -209,12 +209,13 @@
 <!-- Comparativo de Economia -->
 <section class="compare-section">
   <div class="wrap">
-    <div style="text-align:center; max-width:680px; margin:0 auto 30px;">
-      <h2 style="font-size:2rem; font-weight:800; margin-bottom:8px;">Por Que Escolher a DevPlanet?</h2>
+    <div style="text-align:center; max-width:680px; margin:0 auto 24px;">
+      <h2 style="font-size:1.8rem; font-weight:800; margin-bottom:8px;">Por Que Escolher a DevPlanet?</h2>
       <p class="muted">Veja a diferença entre assinar diretamente com as marcas e comprar conosco.</p>
     </div>
 
-    <div class="compare-box">
+    <!-- Tabela para Desktop -->
+    <div class="compare-table-wrap compare-box">
       <table class="compare-table">
         <thead>
           <tr>
@@ -256,6 +257,54 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Cards Otimizados para Mobile (Zero Scroll Horizontal) -->
+    <div class="compare-mobile-cards">
+      <div class="compare-card-m">
+        <div class="cm-head">
+          <span class="cm-badge">Cobrança & Preço</span>
+          <h4>Economia de até 80%</h4>
+        </div>
+        <div class="cm-row good">
+          <span class="cm-icon">✓</span>
+          <div><b>DevPlanet Store:</b> Pagamento único, sem mensalidades e até 80% mais barato.</div>
+        </div>
+        <div class="cm-row bad">
+          <span class="cm-icon">✕</span>
+          <div><b>Tradicional:</b> Cobrança em dólar + IOF todo mês no cartão.</div>
+        </div>
+      </div>
+
+      <div class="compare-card-m">
+        <div class="cm-head">
+          <span class="cm-badge">Pagamento & Prazo</span>
+          <h4>Facilidade Nacional</h4>
+        </div>
+        <div class="cm-row good">
+          <span class="cm-icon">✓</span>
+          <div><b>DevPlanet Store:</b> PIX com desconto ou Cartão em 12x. Entrega em até 24h no WhatsApp.</div>
+        </div>
+        <div class="cm-row bad">
+          <span class="cm-icon">✕</span>
+          <div><b>Tradicional:</b> Exige cartão internacional com limite disponível.</div>
+        </div>
+      </div>
+
+      <div class="compare-card-m">
+        <div class="cm-head">
+          <span class="cm-badge">Atendimento & Pós-Venda</span>
+          <h4>Suporte Humanizado</h4>
+        </div>
+        <div class="cm-row good">
+          <span class="cm-icon">✓</span>
+          <div><b>DevPlanet Store:</b> Suporte direto no WhatsApp em Português e zero risco de renovação.</div>
+        </div>
+        <div class="cm-row bad">
+          <span class="cm-icon">✕</span>
+          <div><b>Tradicional:</b> Atendimento robótico em inglês e renovações surpresas.</div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
