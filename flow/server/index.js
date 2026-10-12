@@ -468,22 +468,18 @@ eco.post('/webhooks/mercadopago', async (req, res) => {
           db.prepare("UPDATE ecommerce_orders SET status='approved', updated_at=CURRENT_TIMESTAMP WHERE id=?").run(order.id);
           const approvedOrder = db.prepare('SELECT * FROM ecommerce_orders WHERE id=?').get(order.id);
           
-          // Piloto Automático: Entrega imediata da licença
-          const fulfillment = await fulfillOrderLicense(approvedOrder, db);
-          const deliveredOrder = db.prepare('SELECT * FROM ecommerce_orders WHERE id=?').get(order.id);
-          await notifyAdminNewOrder(deliveredOrder);
+          // Notificação imediata para o Administrador no Telegram com botão/link de WhatsApp
+          await notifyAdminNewOrder(approvedOrder);
 
-          // Disparo automático via WhatsApp
-          if (deliveredOrder.customer_phone) {
-            const prodInfo = PRODUCT_INSTRUCTIONS[deliveredOrder.product_id] || { guide: 'Siga as orientações oficiais para ativar sua assinatura.' };
-            const waText = 
-              `Olá, ${deliveredOrder.customer_name}! 🚀\n` +
-              `Seu pagamento foi aprovado na DevPlanet Store!\n\n` +
-              `📦 *Produto:* ${deliveredOrder.product_name}\n` +
-              `🔑 *Chave de Ativação:*\n${fulfillment.licenseKey}\n\n` +
-              `📖 *Instruções de Ativação:*\n${prodInfo.guide}\n\n` +
-              `Qualquer dúvida ou suporte, estou à disposição aqui na conversa!`;
-            await sendAutoWhatsAppMessage(deliveredOrder.customer_phone, waText).catch(e => console.warn('[WA Auto Send]:', e.message));
+          // Aviso para o cliente no WhatsApp de que o pagamento foi aprovado e a licença está sendo emitida manualmente
+          if (approvedOrder.customer_phone) {
+            const waAckText = 
+              `Olá, ${approvedOrder.customer_name}! 🚀\n` +
+              `Seu pagamento de R$ ${Number(approvedOrder.amount).toFixed(2)} foi confirmado com sucesso na DevPlanet Store!\n\n` +
+              `📦 *Produto:* ${approvedOrder.product_name}\n` +
+              `🆔 *Pedido:* ${approvedOrder.id}\n\n` +
+              `Nossa equipe já está preparando a sua licença original e enviará os dados oficiais de ativação diretamente aqui no seu WhatsApp em breve!`;
+            await sendAutoWhatsAppMessage(approvedOrder.customer_phone, waAckText).catch(e => console.warn('[WA Auto Send]:', e.message));
           }
         }
       }
@@ -824,7 +820,7 @@ app.listen(PORT, () => {
   console.log(`Servidor em http://localhost:${PORT}`);
   startTelegramPolling(db);
   startWhatsAppService();
-  startMLAutopilotPolling(db);
+  // startMLAutopilotPolling(db); // Integração local pausada a pedido do usuário (vendas manuais)
 
   // Keep-alive automático para evitar que o Render entre em modo de espera (sleep após 15 min)
   const keepAliveUrl = process.env.PUBLIC_BACKEND_URL;
