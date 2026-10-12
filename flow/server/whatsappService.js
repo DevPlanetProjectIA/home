@@ -16,6 +16,9 @@ let isConnected = false;
 let userJid = null;
 
 import { processMessageForSTL, syncHistoricalMessages, getGroupName } from './stlSyncService.js';
+import { handleGroupModeration, getModerationStats } from './groupModerationService.js';
+
+export { getModerationStats };
 
 export function getWhatsAppSocket() {
   return sock;
@@ -45,15 +48,20 @@ export async function startWhatsAppService() {
 
     sock.ev.on('creds.update', saveCreds);
 
-    // 1. Monitoramento de mensagens em tempo real (Novos anexos STL/3MF enviados nos grupos)
+    // 1. Monitoramento de mensagens em tempo real (Moderação e anexos STL/3MF)
     sock.ev.on('messages.upsert', async ({ messages, type }) => {
       for (const msg of messages) {
         try {
           const jid = msg.key?.remoteJid;
           const groupName = getGroupName(jid);
+
+          // 1. Moderação de grupos de STL (apaga textos de não-admins e dispara regras)
+          await handleGroupModeration(sock, msg, groupName);
+
+          // 2. Processamento e download de arquivos 3D (STL/3MF/ZIP/RAR)
           await processMessageForSTL(sock, msg, groupName);
         } catch (err) {
-          console.warn('[STL Sync Warning]:', err.message);
+          console.warn('[WhatsApp Message Handler Warning]:', err.message);
         }
       }
     });

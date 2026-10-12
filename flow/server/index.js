@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { fulfillOrderLicense, PRODUCT_INSTRUCTIONS } from './licenseService.js';
 import { startTelegramPolling, notifyAdminNewOrder } from './telegramService.js';
 import { startMLAutopilotPolling } from './mlAutopilotService.js';
-import { startWhatsAppService, getWhatsAppStatus, sendAutoWhatsAppMessage, fetchWhatsAppGroups, broadcastToWhatsAppGroups, searchPublicWhatsAppGroups, joinAndBroadcastPublicGroups, triggerSTLHistorySync } from './whatsappService.js';
+import { startWhatsAppService, getWhatsAppStatus, sendAutoWhatsAppMessage, fetchWhatsAppGroups, broadcastToWhatsAppGroups, searchPublicWhatsAppGroups, joinAndBroadcastPublicGroups, triggerSTLHistorySync, getModerationStats } from './whatsappService.js';
 import { getSTLServiceStatus, importFromLocalDirectory, syncPendingModelsToSupabase } from './stlSyncService.js';
 
 import { exec } from 'node:child_process';
@@ -558,6 +558,11 @@ eco.post('/orders/:id/deliver', async (req, res) => {
 // 7. Status do WhatsApp Web (para pareamento via QR Code)
 app.get('/api/whatsapp/status', (_req, res) => {
   res.json(getWhatsAppStatus());
+});
+
+// 7.1 Status de Moderação dos Grupos de STL
+app.get('/api/whatsapp/moderation-status', (_req, res) => {
+  res.json(getModerationStats());
 });
 
 // 8. Buscar Grupos do WhatsApp do usuário
