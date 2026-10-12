@@ -16,6 +16,15 @@ import { getSTLServiceStatus, importFromLocalDirectory, syncPendingModelsToSupab
 import { exec } from 'node:child_process';
 import { initDatabase } from './db.js';
 
+// Previne encerramento acidental do daemon por rejeições assíncronas ou quedas de socket
+process.on('uncaughtException', (err) => {
+  console.error('[Process UncaughtException]:', err?.message || err);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('[Process UnhandledRejection]:', reason?.message || reason);
+});
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
