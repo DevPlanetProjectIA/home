@@ -699,51 +699,25 @@ export async function importFromLocalDirectory(dirPath = '') {
           buffer: buf
         });
       }
-      // 2. Arquivos compactados pequenos ou médios (<= 150 MB)
-      else if (stat.size <= 150 * 1024 * 1024) {
-        const fileBuffer = fs.readFileSync(fullPath);
-        extractedItems = await cleanAndExtractAttachments(fileName, fileBuffer);
-      }
-      // 3. Pacotes compactados grandes (> 150 MB, ex: pacotes de mascotes/coleções)
+      // 2. Arquivos compactados (.zip, .rar, .7z) - Proteção Anti-Fragmentação
       else {
-        const tmpExtractDir = path.join(os.tmpdir(), `extract_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`);
-        fs.mkdirSync(tmpExtractDir, { recursive: true });
-        try {
-          execSync(`tar -xf "${fullPath}" -C "${tmpExtractDir}"`, { stdio: 'ignore' });
-          function collectFiles(dir) {
-            let res = [];
-            for (const item of fs.readdirSync(dir)) {
-              const p = path.join(dir, item);
-              const s = fs.statSync(p);
-              if (s.isDirectory()) {
-                res = res.concat(collectFiles(p));
-              } else if (/\.(3mf|stl)$/i.test(item) && s.size <= (MAX_MODEL_FILE_SIZE || 100 * 1024 * 1024)) {
-                res.push({
-                  name: item,
-                  path: p,
-                  size: s.size,
-                  format: item.toLowerCase().endsWith('.3mf') ? '3mf' : 'stl'
-                });
-              }
-            }
-            return res;
-          }
-          const found = collectFiles(tmpExtractDir);
-          for (const item of found) {
-            const buf = fs.readFileSync(item.path);
-            const base = item.name.replace(new RegExp(`\\.${item.format}$`, 'i'), '');
-            extractedItems.push({
-              fileName: item.name,
-              cleanName: base,
-              format: item.format,
-              buffer: buf
-            });
-          }
-        } catch (tarErr) {
-          console.warn(`[Local Watcher Tar Error] ${fileName}:`, tarErr.message);
-        } finally {
-          try { fs.rmSync(tmpExtractDir, { recursive: true, force: true }); } catch {}
+        if (stat.size > (MAX_MODEL_FILE_SIZE || 100 * 1024 * 1024)) {
+          console.warn(`[Local Watcher] ⏭️ Pacote "${fileName}" excede 100 MB (${(stat.size / 1024 / 1024).toFixed(1)} MB). Ignorando para evitar fragmentação.`);
+          localHistoryCache[fileName] = { size: stat.size, mtime: stat.mtimeMs, processed: true, skipped: 'too_large' };
+          saveLocalTracking();
+          continue;
         }
+
+        const fileBuffer = fs.readFileSync(fullPath);
+        const candidates = await cleanAndExtractAttachments(fileName, fileBuffer);
+        // Se houver mais de 2 arquivos no pacote, é um modelo montável/fragmentado: não cadastra peças soltas
+        if (candidates.length > 2) {
+          console.log(`[Local Watcher] ⏭️ Pacote com ${candidates.length} peças detectado em "${fileName}". Ignorando para evitar fragmentação em peças soltas.`);
+          localHistoryCache[fileName] = { size: stat.size, mtime: stat.mtimeMs, processed: true, skipped: 'multi_part_archive' };
+          saveLocalTracking();
+          continue;
+        }
+        extractedItems = candidates;
       }
 
       let fileImportCount = 0;
