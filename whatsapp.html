@@ -112,7 +112,67 @@
           </button>
         </div>
 
-        <div id="broadcast-status-log" style="margin-top:12px; font-size:0.85rem; color:#94a3b8; display:none; background:#09090b; padding:12px; border-radius:8px; border:1px solid #27272a;"></div>
+      <!-- Seção do Sincronizador de STL e 3MF para o 3D-Project -->
+      <div style="text-align:left; background:#0f172a; border:2px solid #38bdf8; border-radius:16px; padding:24px; margin:24px 0; color:#fff;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; flex-wrap:wrap; gap:10px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="font-size:1.6rem;">🦎</span>
+            <div>
+              <h3 style="margin:0; font-size:1.2rem; color:#38bdf8;">Sincronizador 3D (STL & 3MF)</h3>
+              <p class="muted sm" style="margin:0; color:#94a3b8;">Baixa anexos, remove extensão indevida (.zip) e envia para a Biblioteca.</p>
+            </div>
+          </div>
+          <span style="background:#0284c7; color:#fff; font-size:0.75rem; font-weight:700; padding:4px 10px; border-radius:20px;">Ativo em 2 Grupos</span>
+        </div>
+
+        <div style="background:#1e293b; border-radius:12px; padding:14px; margin-bottom:16px; font-size:0.88rem;">
+          <div style="font-weight:600; color:#cbd5e1; margin-bottom:8px;">🎯 Grupos Monitorados no WhatsApp:</div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <span style="background:#334155; padding:6px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:6px;">
+              🟢 <b>STL dos Calangos</b>
+            </span>
+            <span style="background:#334155; padding:6px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:6px;">
+              🟢 <b>STL 🟠🦎</b>
+            </span>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:12px; margin-bottom:16px;">
+          <div style="background:#1e293b; padding:12px; border-radius:10px; text-align:center;">
+            <div style="font-size:0.75rem; color:#94a3b8;">Modelos Processados</div>
+            <div id="stl-total-count" style="font-size:1.5rem; font-weight:800; color:#38bdf8; margin-top:4px;">0</div>
+          </div>
+          <div style="background:#1e293b; padding:12px; border-radius:10px; text-align:center;">
+            <div style="font-size:0.75rem; color:#94a3b8;">Tratamento .ZIP</div>
+            <div style="font-size:1.1rem; font-weight:700; color:#4ade80; margin-top:6px;">Automático</div>
+          </div>
+          <div style="background:#1e293b; padding:12px; border-radius:10px; text-align:center;">
+            <div style="font-size:0.75rem; color:#94a3b8;">Destino</div>
+            <div style="font-size:1.1rem; font-weight:700; color:#facc15; margin-top:6px;">3D-Project</div>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;">
+          <button id="btn-sync-history" style="flex:1; min-width:180px; padding:12px 14px; background:#0284c7; color:#fff; border:none; border-radius:10px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+            📥 Sincronizar Histórico
+          </button>
+          <button id="btn-import-local" style="flex:1; min-width:180px; padding:12px 14px; background:#475569; color:#fff; border:none; border-radius:10px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+            📂 Importar Downloads
+          </button>
+          <button id="btn-sync-supabase" style="flex:1; min-width:180px; padding:12px 14px; background:#16a34a; color:#fff; border:none; border-radius:10px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+            ☁️ Enviar para Supabase
+          </button>
+        </div>
+
+        <div id="stl-sync-log" style="display:none; padding:10px; background:#09090b; border:1px solid #334155; border-radius:8px; font-size:0.82rem; margin-bottom:16px; color:#cbd5e1;"></div>
+
+        <div style="font-weight:600; font-size:0.9rem; margin-bottom:8px; color:#e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+          <span>Modelos Recentes Capturados:</span>
+          <a href="https://devplanetprojectia.github.io/3D-Project/#/biblioteca" target="_blank" style="color:#38bdf8; font-size:0.8rem; text-decoration:none;">Abrir Biblioteca Online ↗</a>
+        </div>
+        <div id="stl-models-list" style="max-height:180px; overflow-y:auto; background:#1e293b; border-radius:10px; padding:8px; font-size:0.85rem;">
+          <div style="text-align:center; padding:14px; color:#94a3b8;">Nenhum modelo baixado ainda. Novos arquivos enviados nos grupos aparecerão aqui em tempo real.</div>
+        </div>
       </div>
 
       <a class="btn big" href="index.html" style="margin-top:10px;">Ir para a Loja</a>
@@ -215,8 +275,93 @@ document.getElementById('btn-broadcast-public')?.addEventListener('click', async
   }
 });
 
-checkInterval = setInterval(checkStatus, 2000);
+// Atualização do status do Sincronizador STL/3MF
+async function updateSTLStatus() {
+  try {
+    const res = await fetch('/api/whatsapp/stl/status');
+    if (!res.ok) return;
+    const data = await res.json();
+    document.getElementById('stl-total-count').textContent = data.stats?.totalDownloaded || 0;
+    const list = document.getElementById('stl-models-list');
+    if (data.recentModels && data.recentModels.length > 0) {
+      list.innerHTML = data.recentModels.map(m => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 8px; border-bottom:1px solid #334155;">
+          <div>
+            <b style="color:#fff;">${m.name}</b>
+            <span style="font-size:0.75rem; background:#0284c7; color:#fff; padding:2px 6px; border-radius:4px; margin-left:6px;">.${m.format.toUpperCase()}</span>
+          </div>
+          <span style="font-size:0.75rem; color:#4ade80;">✔ Sincronizado</span>
+        </div>
+      `).join('');
+    }
+  } catch (err) {}
+}
+
+document.getElementById('btn-sync-history')?.addEventListener('click', async () => {
+  const log = document.getElementById('stl-sync-log');
+  log.style.display = 'block';
+  log.innerHTML = '⏳ Solicitando histórico dos grupos STL dos Calangos e STL 🟠🦎 ao WhatsApp...';
+  try {
+    const res = await fetch('/api/whatsapp/stl/sync', { method: 'POST' });
+    const data = await res.json();
+    if (data.success) {
+      log.innerHTML = '✅ <b>Solicitação enviada com sucesso!</b> O WhatsApp está enviando mensagens antigas. Os modelos encontrados serão descompactados e adicionados automaticamente à biblioteca.';
+      updateSTLStatus();
+    } else {
+      log.innerHTML = '⚠️ Erro: ' + (data.error || 'Falha ao solicitar histórico');
+    }
+  } catch (e) {
+    log.innerHTML = '❌ Erro de conexão com o servidor.';
+  }
+});
+
+document.getElementById('btn-import-local')?.addEventListener('click', async () => {
+  const log = document.getElementById('stl-sync-log');
+  log.style.display = 'block';
+  log.innerHTML = '⏳ Escaneando sua pasta de Downloads em busca de arquivos STL, 3MF e ZIP...';
+  try {
+    const res = await fetch('/api/whatsapp/stl/import-local', { method: 'POST' });
+    const data = await res.json();
+    if (data.success) {
+      log.innerHTML = `✅ <b>Importação concluída!</b> ${data.count} modelos encontrados, limpos e integrados ao projeto!`;
+      updateSTLStatus();
+    } else {
+      log.innerHTML = '⚠️ ' + (data.error || 'Falha ao importar');
+    }
+  } catch (e) {
+    log.innerHTML = '❌ Erro ao conectar com o servidor.';
+  }
+});
+
+document.getElementById('btn-sync-supabase')?.addEventListener('click', async () => {
+  const log = document.getElementById('stl-sync-log');
+  log.style.display = 'block';
+  log.innerHTML = '⏳ Enviando modelos para o Supabase Storage e Catálogo...';
+  try {
+    const res = await fetch('/api/whatsapp/stl/sync-supabase', { method: 'POST' });
+    const data = await res.json();
+    if (data.success) {
+      const okCount = data.results.filter(r => r.success).length;
+      if (okCount > 0) {
+        log.innerHTML = `✅ <b>${okCount} modelos enviados para o Supabase com sucesso!</b> Eles já aparecem na biblioteca online.`;
+      } else {
+        log.innerHTML = `ℹ️ <b>Atenção:</b> Para envio direto ao Supabase Storage pela automação, configure <code>SUPABASE_SERVICE_ROLE_KEY</code> no arquivo <code>server/.env</code>. Os modelos continuam salvos e funcionando na biblioteca Git local.`;
+      }
+      updateSTLStatus();
+    } else {
+      log.innerHTML = '⚠️ ' + (data.error || 'Falha ao enviar para o Supabase');
+    }
+  } catch (e) {
+    log.innerHTML = '❌ Erro ao conectar com o servidor.';
+  }
+});
+
+checkInterval = setInterval(() => {
+  checkStatus();
+  updateSTLStatus();
+}, 2500);
 checkStatus();
+updateSTLStatus();
 </script>
 </body>
 </html>
