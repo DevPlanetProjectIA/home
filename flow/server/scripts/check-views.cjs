@@ -164,6 +164,7 @@ async function main() {
 
   // Itens mapeados conhecidos
   const knownIds = [
+    'MLB5376746733',
     'MLB5376292517',
     'MLB5366400871',
     'MLB5366440323',

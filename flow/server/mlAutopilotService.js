@@ -36,6 +36,13 @@ function updateEnvVar(key, val) {
 }
 
 export const ML_CATALOG = {
+  'MLB5376746733': {
+    name: 'Assinatura Office 365 12 Meses 1TB Nuvem',
+    prefix: 'MS365',
+    guide: '1. Acesse https://setup.office.com ou https://microsoft365.com/redeem com sua conta Microsoft existente (@outlook, @hotmail ou seu e-mail pessoal).\n' +
+           '2. Insira a sua chave oficial de 25 dígitos fornecida acima.\n' +
+           '3. Confirme para vincular os 12 meses oficiais com 1 TB de nuvem no OneDrive seguro e todos os aplicativos para até 5 dispositivos.'
+  },
   'MLB5376292517': {
     name: 'Microsoft 365 Premium 12 Meses',
     prefix: 'MS365',
