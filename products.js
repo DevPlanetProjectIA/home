@@ -63,25 +63,25 @@ const PRODUCTS = [
     name: "Microsoft 365 Premium — 12 meses",
     tag: "Produtividade & Office",
     category: "produtividade",
-    badge: "💼 Mais Procurado",
-    price: 89,
-    creditPrice: 98,
-    originalPrice: 359,
-    discount: "-75% OFF",
+    badge: "⚡ Oferta Relâmpago (48h)",
+    price: 59,
+    creditPrice: 65,
+    originalPrice: 449,
+    discount: "-87% OFF",
     rating: 4.9,
     reviewsCount: 162,
-    short: "12 meses de assinatura oficial Microsoft 365 com 1 TB de OneDrive, Word, Excel, PowerPoint e Outlook.",
-    description: "A suíte de produtividade mais usada no mundo ativada diretamente na sua conta Microsoft oficial. Acesse os aplicativos clássicos e online com 1 TB de armazenamento em nuvem no OneDrive seguro e cofre pessoal.",
+    short: "12 meses oficiais ativados no seu e-mail com 1 TB de OneDrive, Word, Excel, PowerPoint e Outlook. Sem pirataria ou KMS.",
+    description: "Assinatura 100% original e oficial ativada diretamente na sua conta Microsoft existente. Cuidado com ativadores piratas (KMS) que danificam seu Windows e contas compartilhadas. Aqui você tem 1 TB de armazenamento no OneDrive privado, cofre pessoal protegido e todos os aplicativos para até 5 dispositivos.",
     highlights: [
-      "1 TB de armazenamento em nuvem no OneDrive",
-      "Word, Excel, PowerPoint, Outlook e OneNote completos",
-      "Instale no seu PC, Mac, celular ou tablet"
+      "Ativação 100% oficial no SEU próprio e-mail pessoal",
+      "1 TB de nuvem privada no OneDrive com cofre pessoal",
+      "Word, Excel, PowerPoint, Outlook e OneNote em até 5 dispositivos"
     ],
     features: [
-      ["Apps Oficiais", "Word, Excel, PowerPoint e Outlook com recursos premium desbloqueados."],
-      ["1 TB no OneDrive", "Backup automático de fotos e documentos com cofre pessoal criptografado."],
-      ["Multi-dispositivo", "Use em até 5 dispositivos simultâneos (PC, Mac, Android e iOS)."],
-      ["Ativação Segura", "Vinculado à sua própria conta Microsoft de forma 100% oficial."]
+      ["Zero Pirataria / Sem KMS", "Ativado no seu próprio e-mail pessoal oficial da Microsoft, sem programas invasivos."],
+      ["1 TB no OneDrive", "Backup automático com segurança bancária e cofre criptografado."],
+      ["Multi-dispositivo", "Use em até 5 aparelhos simultâneos (PC Windows, Mac, Android e iOS)."],
+      ["Economia Real", "De R$ 449/ano no site da Microsoft por apenas R$ 59 (oferta de lançamento 48h)."]
     ],
     audience: ["Profissionais", "Estudantes", "Empresas", "Famílias"]
   },
