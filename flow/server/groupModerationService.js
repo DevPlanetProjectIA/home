@@ -196,15 +196,22 @@ export async function handleGroupModeration(sock, msg, groupSubject = '') {
   }
 
   // Mensagens enviadas pelo próprio bot ou por Bruno nunca são apagadas
-  if (msg.key.fromMe) {
-    return { handled: false, reason: 'from_me' };
+  const sender = msg.key.participant || msg.participant;
+  const senderNum = normalizeJid(sender);
+  const SUPER_ADMINS = ['5521983110332'];
+
+  if (msg.key.fromMe || SUPER_ADMINS.includes(senderNum)) {
+    return { handled: false, reason: 'from_admin_or_me' };
   }
 
-  // Mensagens antigas (histórico recebido na inicialização) não são apagadas
+  // Tratamento seguro de timestamp (suporta number ou protobuf Long)
   const rawTs = msg.messageTimestamp;
-  const msgTimeMs = typeof rawTs === 'number' ? rawTs * 1000 : (Number(rawTs) * 1000 || Date.now());
+  const msgTimeMs = typeof rawTs === 'number'
+    ? rawTs * 1000
+    : (typeof rawTs === 'object' && rawTs?.low ? rawTs.low * 1000 : (Number(rawTs) * 1000 || Date.now()));
   const ageMs = Date.now() - msgTimeMs;
-  if (ageMs > 5 * 60 * 1000) {
+  // Permite mensagens de até 30 minutos (evita apenas apagamento em massa de dias anteriores)
+  if (ageMs > 30 * 60 * 1000) {
     return { handled: false, reason: 'historical_message' };
   }
 
@@ -218,16 +225,14 @@ export async function handleGroupModeration(sock, msg, groupSubject = '') {
     return { handled: false, reason: 'not_text_message' };
   }
 
-  // Identifica o remetente
-  const sender = msg.key.participant || msg.participant;
   if (!sender) return { handled: false, reason: 'unknown_sender' };
-  const senderNum = normalizeJid(sender);
 
   // Obtém lista de administradores do grupo
   const groupInfo = await getGroupAdmins(sock, jid);
   const isAdmin = groupInfo.admins.has(sender) || groupInfo.admins.has(senderNum);
 
   if (isAdmin) {
+    console.log(`[Moderação STL] Mensagem de texto mantida: +${senderNum} é Administrador no grupo.`);
     return { handled: false, reason: 'sender_is_admin' };
   }
 
