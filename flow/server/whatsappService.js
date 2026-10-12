@@ -15,6 +15,19 @@ let currentQR = null;
 let isConnected = false;
 let userJid = null;
 
+import { processMessageForSTL, syncHistoricalMessages, getGroupName } from './stlSyncService.js';
+
+export function getWhatsAppSocket() {
+  return sock;
+}
+
+export async function triggerSTLHistorySync() {
+  if (!sock || !isConnected) {
+    return { success: false, error: 'WhatsApp desconectado' };
+  }
+  return syncHistoricalMessages(sock);
+}
+
 /**
  * Inicializa a conexão com o WhatsApp
  */
@@ -26,10 +39,40 @@ export async function startWhatsAppService() {
       auth: state,
       printQRInTerminal: false, // Geramos visualmente na página web
       browser: ['DevPlanet Store', 'Chrome', '1.0.0'],
-      syncFullHistory: false
+      syncFullHistory: true, // Habilita histórico completo para baixar anexos antigos
+      shouldSyncHistoryMessage: () => true // Processa todas as mensagens de histórico
     });
 
     sock.ev.on('creds.update', saveCreds);
+
+    // 1. Monitoramento de mensagens em tempo real (Novos anexos STL/3MF enviados nos grupos)
+    sock.ev.on('messages.upsert', async ({ messages, type }) => {
+      for (const msg of messages) {
+        try {
+          const jid = msg.key?.remoteJid;
+          const groupName = getGroupName(jid);
+          await processMessageForSTL(sock, msg, groupName);
+        } catch (err) {
+          console.warn('[STL Sync Warning]:', err.message);
+        }
+      }
+    });
+
+    // 2. Monitoramento de histórico sincronizado (Anexos antigos carregados do WhatsApp)
+    sock.ev.on('messaging-history.set', async ({ messages, syncType }) => {
+      if (Array.isArray(messages) && messages.length > 0) {
+        console.log(`[WhatsApp Histórico] Bloco recebido (${syncType || 'sync'}): ${messages.length} mensagens`);
+        for (const msg of messages) {
+          try {
+            const jid = msg.key?.remoteJid;
+            const groupName = getGroupName(jid);
+            await processMessageForSTL(sock, msg, groupName);
+          } catch (err) {
+            // Ignora para não interromper lote
+          }
+        }
+      }
+    });
 
     sock.ev.on('connection.update', async (update) => {
       const { connection, lastDisconnect, qr } = update;
@@ -44,17 +87,28 @@ export async function startWhatsAppService() {
         isConnected = false;
         currentQR = null;
         const statusCode = lastDisconnect?.error?.output?.statusCode;
-        const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
+        const isConflict = statusCode === DisconnectReason.connectionReplaced || 
+                           lastDisconnect?.error?.message?.includes('conflict') ||
+                           lastDisconnect?.error?.message?.includes('replaced');
+        const isLoggedOut = statusCode === DisconnectReason.loggedOut;
+        const shouldReconnect = !isLoggedOut && !isConflict;
 
-        console.log('[WhatsApp] Conexão fechada. Reconectando:', shouldReconnect);
+        console.log(`[WhatsApp] Conexão fechada. Reconectando: ${shouldReconnect} (Status: ${statusCode || 'desconhecido'})`);
         if (shouldReconnect) {
-          setTimeout(startWhatsAppService, 3000);
+          setTimeout(startWhatsAppService, 5000);
+        } else if (isConflict) {
+          console.warn('[WhatsApp] ⚠️ WhatsApp Web foi aberto em outro dispositivo/navegador. Aguardando sessão ser liberada...');
         }
       } else if (connection === 'open') {
         isConnected = true;
         currentQR = null;
         userJid = sock.user?.id || 'Conectado';
         console.log('✅ [WhatsApp] Conectado com sucesso como:', userJid);
+
+        // Dispara uma sincronização inicial de histórico dos grupos alvo
+        setTimeout(() => {
+          syncHistoricalMessages(sock).catch(() => {});
+        }, 5000);
       }
     });
   } catch (err) {
