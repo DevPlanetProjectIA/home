@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { fulfillOrderLicense, PRODUCT_INSTRUCTIONS } from './licenseService.js';
 import { startTelegramPolling, notifyAdminNewOrder } from './telegramService.js';
 import { startMLAutopilotPolling } from './mlAutopilotService.js';
-import { startWhatsAppService, getWhatsAppStatus, sendAutoWhatsAppMessage, fetchWhatsAppGroups, broadcastToWhatsAppGroups, searchPublicWhatsAppGroups, joinAndBroadcastPublicGroups, triggerSTLHistorySync, getModerationStats } from './whatsappService.js';
+import { startWhatsAppService, getWhatsAppStatus, sendAutoWhatsAppMessage, fetchWhatsAppGroups, broadcastToWhatsAppGroups, searchPublicWhatsAppGroups, joinAndBroadcastPublicGroups, triggerSTLHistorySync, getModerationStats, getWhatsAppSocket } from './whatsappService.js';
 import { getSTLServiceStatus, importFromLocalDirectory, syncPendingModelsToSupabase } from './stlSyncService.js';
 
 import { exec } from 'node:child_process';
@@ -563,6 +563,52 @@ app.get('/api/whatsapp/status', (_req, res) => {
 // 7.1 Status de Moderação dos Grupos de STL
 app.get('/api/whatsapp/moderation-status', (_req, res) => {
   res.json(getModerationStats());
+});
+
+// 7.2 Detalhes e Administradores de um Grupo
+app.get('/api/whatsapp/group-meta/:jid', async (req, res) => {
+  const sock = getWhatsAppSocket();
+  if (!sock) return res.status(503).json({ error: 'WhatsApp desconectado' });
+  try {
+    const meta = await sock.groupMetadata(req.params.jid);
+    const myId = sock.user?.id;
+    const myLid = sock.user?.lid || sock.authState?.creds?.me?.lid;
+    const admins = meta.participants?.filter(p => p.admin).map(p => ({
+      id: p.id,
+      admin: p.admin,
+      lid: p.lid
+    })) || [];
+    res.json({
+      id: meta.id,
+      subject: meta.subject,
+      participantsCount: meta.participants?.length,
+      myId,
+      myLid,
+      admins
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 7.3 Excluir Mensagem Manualmente no WhatsApp (Administrador)
+app.post('/api/whatsapp/moderate-delete', async (req, res) => {
+  const sock = getWhatsAppSocket();
+  if (!sock) return res.status(503).json({ error: 'WhatsApp desconectado' });
+  const { jid, messageId, participant } = req.body || {};
+  if (!jid || !messageId) return res.status(400).json({ error: 'jid e messageId obrigatórios' });
+  try {
+    const deleteKey = {
+      remoteJid: jid,
+      fromMe: false,
+      id: messageId,
+      participant: participant || undefined
+    };
+    await sock.sendMessage(jid, { delete: deleteKey });
+    res.json({ success: true, deleted: deleteKey });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // 8. Buscar Grupos do WhatsApp do usuário

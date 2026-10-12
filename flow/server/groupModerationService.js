@@ -66,6 +66,8 @@ function normalizeJid(jid) {
   return String(jid).split('@')[0].split(':')[0];
 }
 
+const SUPER_ADMIN_NUMBERS = new Set(['5521983110332', '229871095668885']);
+
 /**
  * Obtém ou atualiza os administradores de um grupo
  */
@@ -80,8 +82,8 @@ export async function getGroupAdmins(sock, groupJid) {
     const meta = await sock.groupMetadata(groupJid);
     const admins = new Set();
     let botIsAdmin = false;
-    const botNum = normalizeJid(sock.user?.id);
-    const botLid = normalizeJid(sock.user?.lid);
+    const botNum = normalizeJid(sock.user?.id || sock.authState?.creds?.me?.id || '5521983110332');
+    const botLid = normalizeJid(sock.user?.lid || sock.authState?.creds?.me?.lid || '229871095668885');
 
     for (const p of meta.participants || []) {
       if (p.admin === 'admin' || p.admin === 'superadmin') {
@@ -127,80 +129,87 @@ function unwrapMessage(msg) {
 }
 
 /**
- * Detecta se a mensagem é um arquivo enviado (NÃO deve ser apagada)
+ * Detecta se a mensagem é um arquivo 3D legítimo enviado (.stl, .3mf, .zip, .rar, etc.)
+ * Somente arquivos 3D e arquivos compactados de modelos NÃO são apagados.
  */
 export function isFileAttachment(msg) {
   const m = unwrapMessage(msg);
   if (!m) return false;
 
-  // 1. Documentos (arquivos .stl, .3mf, .zip, .rar, etc.)
-  if (m.documentMessage || m.documentWithCaptionMessage?.message?.documentMessage) {
-    return true;
-  }
+  // Documentos (arquivos .stl, .3mf, .zip, .rar, .7z, .obj, .step, .stp)
+  const doc = m.documentMessage || m.documentWithCaptionMessage?.message?.documentMessage;
+  if (doc) {
+    const rawFileName = (doc.fileName || '').toLowerCase();
+    const mimetype = (doc.mimetype || '').toLowerCase();
 
-  // 2. Fotos e imagens da peça
-  if (m.imageMessage) {
-    return true;
-  }
+    const is3d = 
+      /\.(stl|3mf|zip|rar|7z|obj|step|stp)$/i.test(rawFileName) ||
+      mimetype.includes('stl') ||
+      mimetype.includes('3mf') ||
+      mimetype.includes('zip') ||
+      mimetype.includes('rar') ||
+      mimetype.includes('7z') ||
+      (mimetype.includes('octet-stream') && !/\.(exe|apk|pdf|doc|docx|mp3|mp4|ogg)$/i.test(rawFileName));
 
-  // 3. Vídeos da peça / montagem
-  if (m.videoMessage) {
-    return true;
+    if (is3d) return true;
   }
 
   return false;
 }
 
 /**
- * Detecta se a mensagem é pura conversa/texto (que deve ser apagada se enviada por não-admin)
+ * Detecta se a mensagem é conversa, texto, foto, áudio ou figurinha
+ * que deve ser apagada caso enviada por usuário que não seja Administrador.
  */
 export function isPureTextMessage(msg) {
   const m = unwrapMessage(msg);
   if (!m) return false;
 
-  // Ignora mensagens de protocolo (apagamento prévio, edições, notificações de sistema)
+  // Ignora mensagens de protocolo técnico (reações com emoji, revogação prévia, chaves)
   if (m.protocolMessage || m.reactionMessage || m.senderKeyDistributionMessage) {
     return false;
   }
 
-  // Se for anexo de arquivo, foto ou vídeo, NÃO é texto puro
+  // Se for anexo de arquivo 3D legítimo (STL, 3MF, ZIP, RAR), NÃO deve ser apagada
   if (isFileAttachment(msg)) {
     return false;
   }
 
-  // Se tiver texto em conversation ou extendedTextMessage
-  const hasText = !!(m.conversation || m.extendedTextMessage?.text);
-  if (hasText) return true;
-
-  // Áudio ou figurinha enviados sem arquivo também contam como conversa
-  if (m.audioMessage || m.stickerMessage) return true;
-
-  return false;
+  // Qualquer outra mensagem no grupo de STL é texto/conversa não-autorizada
+  // (inclui fotos, prints, memes, perguntas, áudios, vídeos, figurinhas ou texto puro)
+  return true;
 }
 
 /**
  * Processa a moderação de mensagens nos grupos de STL:
  * 1. Confere se é um grupo de STL.
- * 2. Confere se é uma mensagem recente (< 5 min) e não é do bot.
+ * 2. Confere se é uma mensagem recente (< 2h) e não é do bot ou superadmin.
  * 3. Confere se o remetente é administrador. Se for, mantém.
- * 4. Confere se é mensagem de texto (não-arquivo).
- * 5. Se for texto de não-admin: apaga para todos como administrador.
+ * 4. Confere se é arquivo 3D legítimo (.stl, .3mf, .zip, .rar). Se for, mantém.
+ * 5. Se for conversa/foto/texto de não-admin: apaga para todos como administrador.
  * 6. A cada 5 mensagens apagadas no grupo, envia as regras oficiais.
  */
 export async function handleGroupModeration(sock, msg, groupSubject = '') {
   if (!msg || !msg.key) return { handled: false };
 
   const jid = msg.key.remoteJid;
-  if (!isSTLOnlyGroup(jid, groupSubject)) {
+  let isSTL = isSTLOnlyGroup(jid, groupSubject);
+  if (!isSTL) {
+    const cached = groupAdminsCache.get(jid);
+    if (cached && isSTLOnlyGroup(jid, cached.subject)) {
+      isSTL = true;
+    }
+  }
+
+  if (!isSTL) {
     return { handled: false, reason: 'not_stl_group' };
   }
 
   // Mensagens enviadas pelo próprio bot ou por Bruno nunca são apagadas
   const sender = msg.key.participant || msg.participant;
   const senderNum = normalizeJid(sender);
-  const SUPER_ADMINS = ['5521983110332'];
 
-  if (msg.key.fromMe || SUPER_ADMINS.includes(senderNum)) {
+  if (msg.key.fromMe || SUPER_ADMIN_NUMBERS.has(senderNum)) {
     return { handled: false, reason: 'from_admin_or_me' };
   }
 
@@ -210,19 +219,20 @@ export async function handleGroupModeration(sock, msg, groupSubject = '') {
     ? rawTs * 1000
     : (typeof rawTs === 'object' && rawTs?.low ? rawTs.low * 1000 : (Number(rawTs) * 1000 || Date.now()));
   const ageMs = Date.now() - msgTimeMs;
-  // Permite mensagens de até 30 minutos (evita apenas apagamento em massa de dias anteriores)
-  if (ageMs > 30 * 60 * 1000) {
+  // Permite mensagens de até 2 horas (evita apenas apagamento em massa de dias anteriores)
+  if (ageMs > 2 * 60 * 60 * 1000) {
     return { handled: false, reason: 'historical_message' };
   }
 
-  // Se for arquivo enviado (STL, 3MF, ZIP, imagem da peça), NÃO apaga
+  // Se for arquivo 3D legítimo enviado (STL, 3MF, ZIP, RAR), NÃO apaga
   if (isFileAttachment(msg)) {
+    console.log(`[Moderação STL] 📎 Arquivo 3D preservado de +${senderNum} no grupo.`);
     return { handled: false, reason: 'is_file_attachment' };
   }
 
-  // Confere se é mensagem de texto / conversa
+  // Confere se é mensagem moderável (texto, foto com pergunta, áudio, figurinha, etc.)
   if (!isPureTextMessage(msg)) {
-    return { handled: false, reason: 'not_text_message' };
+    return { handled: false, reason: 'not_moderable' };
   }
 
   if (!sender) return { handled: false, reason: 'unknown_sender' };
@@ -236,7 +246,7 @@ export async function handleGroupModeration(sock, msg, groupSubject = '') {
     return { handled: false, reason: 'sender_is_admin' };
   }
 
-  // Remetente NÃO é administrador e enviou mensagem de texto no grupo de STL -> APAGAR!
+  // Remetente NÃO é administrador e enviou mensagem não-arquivo no grupo de STL -> APAGAR!
   const groupName = groupInfo.subject || groupSubject || jid;
 
   try {
@@ -244,7 +254,7 @@ export async function handleGroupModeration(sock, msg, groupSubject = '') {
       remoteJid: jid,
       fromMe: false,
       id: msg.key.id,
-      participant: sender
+      participant: msg.key.participant || msg.participant || sender
     };
 
     console.log(`[Moderação STL] 🗑️ Apagando mensagem de texto de +${senderNum} no grupo "${groupName}"...`);
