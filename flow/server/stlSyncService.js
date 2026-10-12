@@ -3,14 +3,16 @@ import { downloadMediaMessage } from '@whiskeysockets/baileys';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { exec } from 'node:child_process';
+import { exec, execSync } from 'node:child_process';
+import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import {
   cleanAndExtractAttachments,
   extractModelMetrics,
   generateModelId,
   slugify,
-  validate3DModel
+  validate3DModel,
+  MAX_MODEL_FILE_SIZE
 } from './stlModelParser.js';
 import { humanizeModelName } from './nameHumanizer.js';
 import { generateThumbnailForModel } from './thumbnailGenerator.js';
@@ -20,7 +22,7 @@ const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
 const DOWNLOADS_DIR = path.join(DATA_DIR, 'downloads', 'stl_models');
 fs.mkdirSync(DOWNLOADS_DIR, { recursive: true });
 
-// Arquivo de rastreio para evitar downloads duplicados
+// Arquivo de rastreio para evitar downloads duplicados do WhatsApp
 const TRACKING_FILE = path.join(DATA_DIR, 'stl_download_history.json');
 let historyCache = {};
 if (fs.existsSync(TRACKING_FILE)) {
@@ -36,6 +38,25 @@ function saveTracking() {
     fs.writeFileSync(TRACKING_FILE, JSON.stringify(historyCache, null, 2));
   } catch (err) {
     console.error('[STL Sync] Erro ao salvar histórico:', err.message);
+  }
+}
+
+// Arquivo de rastreio para evitar reimportações desnecessárias da pasta Downloads local
+const LOCAL_TRACKING_FILE = path.join(DATA_DIR, 'local_download_history.json');
+let localHistoryCache = {};
+if (fs.existsSync(LOCAL_TRACKING_FILE)) {
+  try {
+    localHistoryCache = JSON.parse(fs.readFileSync(LOCAL_TRACKING_FILE, 'utf8'));
+  } catch {
+    localHistoryCache = {};
+  }
+}
+
+function saveLocalTracking() {
+  try {
+    fs.writeFileSync(LOCAL_TRACKING_FILE, JSON.stringify(localHistoryCache, null, 2));
+  } catch (err) {
+    console.error('[Local Watcher] Erro ao salvar histórico:', err.message);
   }
 }
 
@@ -350,7 +371,7 @@ let pushTimeout = null;
 export function pushCatalogToGitHub() {
   if (pushTimeout) clearTimeout(pushTimeout);
   pushTimeout = setTimeout(() => {
-    const cmd = 'git add data/catalog.json data/community_users.json && git commit -m "feat(catalog): auto-sync novo modelo do WhatsApp" && git push origin main';
+    const cmd = 'git add data/catalog.json data/community_users.json && git commit -m "feat(catalog): auto-sync novo modelo" && git pull --rebase origin main && git push origin main';
     exec(cmd, { cwd: PROJECT_ROOT }, (err) => {
       if (err) console.warn('[Git Auto-Push Warning]:', err.message);
       else console.log('🚀 [Git Auto-Push] Catálogo sincronizado com o GitHub Pages com sucesso!');
@@ -599,35 +620,146 @@ export async function syncHistoricalMessages(sock) {
   return { success: true, requests };
 }
 
+let isImportingLocal = false;
+
 /**
  * Escaneia uma pasta local (ex: Downloads do usuário) e importa todos os modelos
  */
 export async function importFromLocalDirectory(dirPath = '') {
-  const targetDir = dirPath || path.join(process.env.USERPROFILE || 'C:\\Users\\bruno', 'Downloads');
-  if (!fs.existsSync(targetDir)) {
-    return { success: false, error: `Diretório não encontrado: ${targetDir}`, imported: [] };
+  if (isImportingLocal) {
+    return { success: false, busy: true, imported: [] };
   }
+  isImportingLocal = true;
 
-  const files = fs.readdirSync(targetDir);
-  const modelFiles = files.filter(f => /\.(stl|3mf|zip|rar)$/i.test(f));
-  const imported = [];
+  try {
+    const targetDir = dirPath || path.join(process.env.USERPROFILE || 'C:\\Users\\bruno', 'Downloads');
+    if (!fs.existsSync(targetDir)) {
+      return { success: false, error: `Diretório não encontrado: ${targetDir}`, imported: [] };
+    }
 
-  console.log(`[STL Local Import] Encontrados ${modelFiles.length} arquivos candidatos em ${targetDir}`);
+    let files = [];
+    try {
+      files = fs.readdirSync(targetDir);
+    } catch (err) {
+      return { success: false, error: err.message, imported: [] };
+    }
+
+    // Ordena: arquivos 3D individuais primeiro (mais rápidos), depois compactados; e dentro de cada grupo, os mais recentes primeiro
+    const modelFiles = files
+      .filter(f => /\.(stl|3mf|zip|rar|7z)$/i.test(f))
+      .map(f => {
+        try {
+          const s = fs.statSync(path.join(targetDir, f));
+          return { name: f, isDirect: /\.(stl|3mf)$/i.test(f), mtime: s.mtimeMs, size: s.size };
+        } catch {
+          return null;
+        }
+      })
+      .filter(Boolean)
+      .sort((a, b) => {
+        if (a.isDirect !== b.isDirect) return a.isDirect ? -1 : 1;
+        return b.mtime - a.mtime;
+      })
+      .map(f => f.name);
+
+    const imported = [];
 
   for (const fileName of modelFiles) {
     const fullPath = path.join(targetDir, fileName);
     try {
       const stat = fs.statSync(fullPath);
-      if (!stat.isFile() || stat.size === 0 || stat.size > 80 * 1024 * 1024) continue;
+      if (!stat.isFile() || stat.size === 0) continue;
 
-      const fileBuffer = fs.readFileSync(fullPath);
-      const extracted = await cleanAndExtractAttachments(fileName, fileBuffer);
+      // Evita reprocessar arquivos idênticos já importados com sucesso
+      const cached = localHistoryCache[fileName];
+      if (cached && cached.size === stat.size && cached.mtime === stat.mtimeMs && cached.processed) {
+        continue;
+      }
 
-      for (const item of extracted) {
-        // Validação rigorosa preliminar
+      console.log(`[Local Watcher] 🔍 Processando arquivo: "${fileName}" (${(stat.size / (1024 * 1024)).toFixed(1)} MB)...`);
+
+      let extractedItems = [];
+
+      // 1. Arquivos 3D diretos (.stl, .3mf)
+      if (/\.(stl|3mf)$/i.test(fileName)) {
+        if (stat.size > (MAX_MODEL_FILE_SIZE || 100 * 1024 * 1024)) {
+          console.warn(`[Local Watcher] ⚠️ "${fileName}" excede 100 MB (${(stat.size / 1024 / 1024).toFixed(1)} MB). Ignorando.`);
+          localHistoryCache[fileName] = { size: stat.size, mtime: stat.mtimeMs, processed: true, skipped: 'too_large' };
+          saveLocalTracking();
+          continue;
+        }
+
+        const buf = fs.readFileSync(fullPath);
+        const ext = fileName.toLowerCase().endsWith('.3mf') ? '3mf' : 'stl';
+        const base = fileName.replace(new RegExp(`\\.${ext}$`, 'i'), '');
+        extractedItems.push({
+          fileName,
+          cleanName: base,
+          format: ext,
+          buffer: buf
+        });
+      }
+      // 2. Arquivos compactados pequenos ou médios (<= 150 MB)
+      else if (stat.size <= 150 * 1024 * 1024) {
+        const fileBuffer = fs.readFileSync(fullPath);
+        extractedItems = await cleanAndExtractAttachments(fileName, fileBuffer);
+      }
+      // 3. Pacotes compactados grandes (> 150 MB, ex: pacotes de mascotes/coleções)
+      else {
+        const tmpExtractDir = path.join(os.tmpdir(), `extract_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`);
+        fs.mkdirSync(tmpExtractDir, { recursive: true });
+        try {
+          execSync(`tar -xf "${fullPath}" -C "${tmpExtractDir}"`, { stdio: 'ignore' });
+          function collectFiles(dir) {
+            let res = [];
+            for (const item of fs.readdirSync(dir)) {
+              const p = path.join(dir, item);
+              const s = fs.statSync(p);
+              if (s.isDirectory()) {
+                res = res.concat(collectFiles(p));
+              } else if (/\.(3mf|stl)$/i.test(item) && s.size <= (MAX_MODEL_FILE_SIZE || 100 * 1024 * 1024)) {
+                res.push({
+                  name: item,
+                  path: p,
+                  size: s.size,
+                  format: item.toLowerCase().endsWith('.3mf') ? '3mf' : 'stl'
+                });
+              }
+            }
+            return res;
+          }
+          const found = collectFiles(tmpExtractDir);
+          for (const item of found) {
+            const buf = fs.readFileSync(item.path);
+            const base = item.name.replace(new RegExp(`\\.${item.format}$`, 'i'), '');
+            extractedItems.push({
+              fileName: item.name,
+              cleanName: base,
+              format: item.format,
+              buffer: buf
+            });
+          }
+        } catch (tarErr) {
+          console.warn(`[Local Watcher Tar Error] ${fileName}:`, tarErr.message);
+        } finally {
+          try { fs.rmSync(tmpExtractDir, { recursive: true, force: true }); } catch {}
+        }
+      }
+
+      let fileImportCount = 0;
+
+      for (const item of extractedItems) {
+        // Pré-análise de duplicatas
+        const dup = checkDuplicateModel(item.buffer, item.format, item.cleanName);
+        if (dup.isDuplicate) {
+          console.log(`[Local Watcher] ⏭️ Duplicata ignorada: ${dup.reason}`);
+          continue;
+        }
+
+        // Validação preventiva
         const val = validate3DModel(item.buffer, item.format, item.cleanName);
         if (!val.valid) {
-          console.warn(`⚠️ [STL Import Rejeitado] Modelo "${item.cleanName}" descartado: ${val.reason}`);
+          console.warn(`[Local Watcher] ⚠️ Modelo "${item.cleanName}" descartado: ${val.reason}`);
           continue;
         }
 
@@ -636,7 +768,7 @@ export async function importFromLocalDirectory(dirPath = '') {
         const metrics = val.metrics || extractModelMetrics(item.buffer, item.format);
         const thumbBuffer = await generateThumbnailForModel(item.buffer, item.format, friendlyName);
 
-        // Salva cópia
+        // Salva cópia física
         const destFolder = path.join(DOWNLOADS_DIR, 'importados', modelId);
         fs.mkdirSync(destFolder, { recursive: true });
         fs.writeFileSync(path.join(destFolder, `${modelId}.${item.format}`), item.buffer);
@@ -644,35 +776,31 @@ export async function importFromLocalDirectory(dirPath = '') {
           fs.writeFileSync(path.join(destFolder, 'thumb.png'), thumbBuffer);
         }
 
-        // Envia ao Supabase
+        // Upload para o Supabase
         const supabaseRes = await syncToSupabase({
           modelId,
           cleanName: friendlyName,
           format: item.format,
           fileBuffer: item.buffer,
           metrics,
-          groupName: 'Importação Local',
+          groupName: 'Downloads PC',
           authorName: SUPABASE_AUTHOR,
           thumbBuffer
         });
 
-        if (!supabaseRes.success) {
-          console.warn(`⚠️ [STL Import Falhou] Upload Supabase falhou para "${friendlyName}": ${supabaseRes.reason}`);
-          continue;
-        }
-
-        // Salva no Git local apenas se o Supabase aceitou
+        // Atualiza repositório Git local
         syncToLocalGitProject({
           modelId,
           cleanName: friendlyName,
           format: item.format,
           fileBuffer: item.buffer,
           metrics,
-          groupName: 'Importação Local',
+          groupName: 'Downloads PC',
           authorName: SUPABASE_AUTHOR,
           thumbBuffer
         });
 
+        fileImportCount++;
         imported.push({
           modelId,
           name: friendlyName,
@@ -681,13 +809,32 @@ export async function importFromLocalDirectory(dirPath = '') {
           supabase: supabaseRes.success,
           thumb: supabaseRes.thumbOk
         });
+        console.log(`✅ [Local Watcher] Modelo adicionado à 3D Library: "${friendlyName}" (${item.format.toUpperCase()})`);
       }
+
+      localHistoryCache[fileName] = {
+        size: stat.size,
+        mtime: stat.mtimeMs,
+        processed: true,
+        modelsImported: fileImportCount,
+        lastProcessedAt: new Date().toISOString()
+      };
+      saveLocalTracking();
+
     } catch (err) {
-      console.warn(`[STL Import Error] ${fileName}:`, err.message);
+      console.warn(`[Local Watcher Error] ${fileName}:`, err.message);
     }
   }
 
+  if (imported.length > 0) {
+    console.log(`🚀 [Local Watcher] ${imported.length} novos modelos importados da pasta Downloads! Disparando sync com GitHub Pages...`);
+    pushCatalogToGitHub();
+  }
+
   return { success: true, count: imported.length, imported };
+} finally {
+  isImportingLocal = false;
+}
 }
 
 /**
@@ -771,4 +918,37 @@ export async function purgeDeletedModels() {
 // Executa limpeza periódica
 setInterval(purgeDeletedModels, 5 * 60 * 1000);
 setTimeout(purgeDeletedModels, 10000);
+
+// --- Monitor Automático em Tempo Real da Pasta Downloads do PC Local ---
+const localDownloadsFolder = path.join(process.env.USERPROFILE || 'C:\\Users\\bruno', 'Downloads');
+
+if (fs.existsSync(localDownloadsFolder)) {
+  let watchDebounce = null;
+  try {
+    fs.watch(localDownloadsFolder, (_eventType, filename) => {
+      if (filename && /\.(stl|3mf|zip|rar|7z)$/i.test(filename)) {
+        if (watchDebounce) clearTimeout(watchDebounce);
+        watchDebounce = setTimeout(() => {
+          console.log(`[Local Watcher] 📂 Mudança detectada na pasta Downloads ("${filename}"). Iniciando importação...`);
+          importFromLocalDirectory(localDownloadsFolder).catch(e => console.warn('[Watcher]:', e.message));
+        }, 3000);
+      }
+    });
+    console.log(`👁️ [Local Watcher] Monitorando pasta Downloads em tempo real: ${localDownloadsFolder}`);
+  } catch (err) {
+    console.warn('[Local Watcher Setup Warning]:', err.message);
+  }
+
+  // Polling regular a cada 45 segundos como garantia para novos arquivos
+  setInterval(() => {
+    importFromLocalDirectory(localDownloadsFolder).catch(() => {});
+  }, 45 * 1000);
+
+  // Primeira varredura automática ao iniciar (3 segundos após o boot)
+  setTimeout(() => {
+    console.log('[Local Watcher] 🚀 Executando varredura inicial da pasta Downloads...');
+    importFromLocalDirectory(localDownloadsFolder).catch(() => {});
+  }, 3000);
+}
+
 
