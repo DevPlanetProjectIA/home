@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { fulfillOrderLicense, PRODUCT_INSTRUCTIONS } from './licenseService.js';
 import { startTelegramPolling, notifyAdminNewOrder } from './telegramService.js';
 import { startMLAutopilotPolling } from './mlAutopilotService.js';
-import { startWhatsAppService, getWhatsAppStatus, sendAutoWhatsAppMessage, fetchWhatsAppGroups, broadcastToWhatsAppGroups, searchPublicWhatsAppGroups, joinAndBroadcastPublicGroups, triggerSTLHistorySync, getModerationStats, getWhatsAppSocket } from './whatsappService.js';
+import { startWhatsAppService, getWhatsAppStatus, sendAutoWhatsAppMessage, fetchWhatsAppGroups, broadcastToWhatsAppGroups, searchPublicWhatsAppGroups, joinAndBroadcastPublicGroups, triggerSTLHistorySync, getModerationStats, getWhatsAppSocket, scanAndModerateRecentSTLHistory } from './whatsappService.js';
 import { getSTLServiceStatus, importFromLocalDirectory, syncPendingModelsToSupabase } from './stlSyncService.js';
 
 import { exec } from 'node:child_process';
@@ -649,9 +649,15 @@ app.get('/api/whatsapp/stl/status', (_req, res) => {
   res.json(getSTLServiceStatus());
 });
 
-// 13. Disparar sincronização manual de histórico antigo dos grupos
+// 13. Disparar sincronização manual de histórico antigo dos grupos e varredura de moderação
 app.post('/api/whatsapp/stl/sync', async (_req, res) => {
   const result = await triggerSTLHistorySync();
+  res.json(result);
+});
+
+app.post('/api/whatsapp/stl/moderate-scan', async (_req, res) => {
+  const sock = getWhatsAppSocket();
+  const result = await scanAndModerateRecentSTLHistory(sock);
   res.json(result);
 });
 

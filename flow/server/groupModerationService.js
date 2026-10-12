@@ -44,6 +44,38 @@ function saveModerationData() {
 }
 
 /**
+ * Cache de deduplicação em memória para evitar que o mesmo ID de mensagem
+ * seja processado ou contabilizado múltiplas vezes caso o WhatsApp reemita eventos.
+ */
+const processedMsgIds = new Map();
+function markAsProcessed(id) {
+  if (!id) return;
+  processedMsgIds.set(id, Date.now());
+  if (processedMsgIds.size > 2000) {
+    const cutoff = Date.now() - (4 * 60 * 60 * 1000);
+    for (const [k, ts] of processedMsgIds.entries()) {
+      if (ts < cutoff) processedMsgIds.delete(k);
+    }
+  }
+}
+
+/**
+ * Fila sequencial de exclusão de mensagens com pacing humanizado (250ms)
+ * para evitar flood e perda de pacotes no socket do Baileys.
+ */
+let deletionQueue = Promise.resolve();
+function queueDeleteMessage(sock, jid, deleteKey) {
+  const p = deletionQueue.then(async () => {
+    await sock.sendMessage(jid, { delete: deleteKey });
+    await new Promise(r => setTimeout(r, 250));
+  });
+  deletionQueue = p.catch(err => {
+    console.warn('[Moderação STL Fila Warning]:', err.message);
+  });
+  return p;
+}
+
+/**
  * Cache em memória dos administradores dos grupos (TTL: 3 minutos)
  */
 const groupAdminsCache = new Map();
@@ -117,7 +149,7 @@ export async function getGroupAdmins(sock, groupJid) {
 }
 
 /**
- * Desembrulha mensagens efêmeras, visualização única, etc.
+ * Desembrulha mensagens efêmeras, visualização única, mensagens editadas, etc.
  */
 function unwrapMessage(msg) {
   let m = msg?.message;
@@ -125,8 +157,16 @@ function unwrapMessage(msg) {
   if (m.ephemeralMessage?.message) m = m.ephemeralMessage.message;
   if (m.viewOnceMessage?.message) m = m.viewOnceMessage.message;
   if (m.viewOnceMessageV2?.message) m = m.viewOnceMessageV2.message;
+  if (m.editedMessage?.message?.protocolMessage?.editedMessage) {
+    m = m.editedMessage.message.protocolMessage.editedMessage;
+  }
   return m;
 }
+
+/**
+ * Fila de tentativas para mensagens recebidas antes da conclusão da chave de descriptografia Signal.
+ */
+const pendingUndecrypted = new Map();
 
 /**
  * Detecta se a mensagem é um arquivo 3D legítimo enviado (.stl, .3mf, .zip, .rar, etc.)
@@ -162,6 +202,8 @@ export function isFileAttachment(msg) {
  * que deve ser apagada caso enviada por usuário que não seja Administrador.
  */
 export function isPureTextMessage(msg) {
+  if (msg?.messageStubType) return false;
+
   const m = unwrapMessage(msg);
   if (!m) return false;
 
@@ -181,9 +223,15 @@ export function isPureTextMessage(msg) {
 }
 
 /**
+ * Janela máxima de tempo para moderação: 24 horas (permite apagar mensagens do dia todo
+ * inclusive retroativas e retentativas assíncronas).
+ */
+const MAX_MODERATION_AGE_MS = 24 * 60 * 60 * 1000;
+
+/**
  * Processa a moderação de mensagens nos grupos de STL:
  * 1. Confere se é um grupo de STL.
- * 2. Confere se é uma mensagem recente (< 2h) e não é do bot ou superadmin.
+ * 2. Confere se é uma mensagem recente (< 24h) e não é do bot ou superadmin.
  * 3. Confere se o remetente é administrador. Se for, mantém.
  * 4. Confere se é arquivo 3D legítimo (.stl, .3mf, .zip, .rar). Se for, mantém.
  * 5. Se for conversa/foto/texto de não-admin: apaga para todos como administrador.
@@ -205,11 +253,17 @@ export async function handleGroupModeration(sock, msg, groupSubject = '') {
     return { handled: false, reason: 'not_stl_group' };
   }
 
+  const msgId = msg.key.id;
+  if (msgId && processedMsgIds.has(msgId)) {
+    return { handled: false, reason: 'already_processed' };
+  }
+
   // Mensagens enviadas pelo próprio bot ou por Bruno nunca são apagadas
   const sender = msg.key.participant || msg.participant;
   const senderNum = normalizeJid(sender);
 
   if (msg.key.fromMe || SUPER_ADMIN_NUMBERS.has(senderNum)) {
+    markAsProcessed(msgId);
     return { handled: false, reason: 'from_admin_or_me' };
   }
 
@@ -219,13 +273,28 @@ export async function handleGroupModeration(sock, msg, groupSubject = '') {
     ? rawTs * 1000
     : (typeof rawTs === 'object' && rawTs?.low ? rawTs.low * 1000 : (Number(rawTs) * 1000 || Date.now()));
   const ageMs = Date.now() - msgTimeMs;
-  // Permite mensagens de até 2 horas (evita apenas apagamento em massa de dias anteriores)
-  if (ageMs > 2 * 60 * 60 * 1000) {
+  if (ageMs > MAX_MODERATION_AGE_MS) {
     return { handled: false, reason: 'historical_message' };
+  }
+
+  // Se a mensagem ainda não foi descriptografada pelo Baileys (primeira mensagem de novo contato)
+  if (!unwrapMessage(msg)) {
+    if (!pendingUndecrypted.has(msgId)) {
+      pendingUndecrypted.set(msgId, Date.now());
+      setTimeout(() => {
+        pendingUndecrypted.delete(msgId);
+        if (!processedMsgIds.has(msgId)) {
+          // Re-tenta avaliar após 2.5s caso a sessão Signal tenha sido estabelecida
+          handleGroupModeration(sock, msg, groupSubject).catch(() => {});
+        }
+      }, 2500);
+    }
+    return { handled: false, reason: 'pending_decryption' };
   }
 
   // Se for arquivo 3D legítimo enviado (STL, 3MF, ZIP, RAR), NÃO apaga
   if (isFileAttachment(msg)) {
+    markAsProcessed(msgId);
     console.log(`[Moderação STL] 📎 Arquivo 3D preservado de +${senderNum} no grupo.`);
     return { handled: false, reason: 'is_file_attachment' };
   }
@@ -242,6 +311,7 @@ export async function handleGroupModeration(sock, msg, groupSubject = '') {
   const isAdmin = groupInfo.admins.has(sender) || groupInfo.admins.has(senderNum);
 
   if (isAdmin) {
+    markAsProcessed(msgId);
     console.log(`[Moderação STL] Mensagem de texto mantida: +${senderNum} é Administrador no grupo.`);
     return { handled: false, reason: 'sender_is_admin' };
   }
@@ -258,7 +328,8 @@ export async function handleGroupModeration(sock, msg, groupSubject = '') {
     };
 
     console.log(`[Moderação STL] 🗑️ Apagando mensagem de texto de +${senderNum} no grupo "${groupName}"...`);
-    await sock.sendMessage(jid, { delete: deleteKey });
+    await queueDeleteMessage(sock, jid, deleteKey);
+    markAsProcessed(msgId);
 
     // Atualiza contadores do grupo
     if (!moderationData[jid]) {
@@ -313,6 +384,33 @@ export async function handleGroupModeration(sock, msg, groupSubject = '') {
     }
     return { handled: false, error: deleteErr.message };
   }
+}
+
+/**
+ * Realiza varredura retroativa sob demanda nos grupos de STL para garantir
+ * que mensagens não-autorizadas enviadas enquanto o bot estava desconectado
+ * ou antes da resolução da sessão Signal sejam moderadas.
+ */
+export async function scanAndModerateRecentSTLHistory(sock) {
+  if (!sock) return { success: false, error: 'Socket WhatsApp desconectado' };
+  console.log('[Moderação STL] 🔎 Disparando varredura retroativa de mensagens nos grupos de STL...');
+  const results = [];
+
+  for (const groupJid of STL_GROUP_IDS) {
+    try {
+      const dummyKey = { remoteJid: groupJid, id: `HIST_MOD_${Date.now()}`, fromMe: false };
+      const reqId = await sock.fetchMessageHistory(50, dummyKey, Date.now()).catch(e => {
+        console.warn(`[Moderação STL Aviso] Falha ao requisitar histórico para ${groupJid}:`, e?.message || e);
+        return null;
+      });
+      results.push({ jid: groupJid, requestId: reqId, success: !!reqId });
+      await new Promise(r => setTimeout(r, 600));
+    } catch (err) {
+      results.push({ jid: groupJid, success: false, error: err.message });
+    }
+  }
+
+  return { success: true, results };
 }
 
 /**

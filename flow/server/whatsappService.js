@@ -16,9 +16,9 @@ let isConnected = false;
 let userJid = null;
 
 import { processMessageForSTL, syncHistoricalMessages, getGroupName } from './stlSyncService.js';
-import { handleGroupModeration, getModerationStats } from './groupModerationService.js';
+import { handleGroupModeration, getModerationStats, scanAndModerateRecentSTLHistory, isSTLOnlyGroup } from './groupModerationService.js';
 
-export { getModerationStats };
+export { getModerationStats, scanAndModerateRecentSTLHistory };
 
 export function getWhatsAppSocket() {
   return sock;
@@ -28,6 +28,7 @@ export async function triggerSTLHistorySync() {
   if (!sock || !isConnected) {
     return { success: false, error: 'WhatsApp desconectado' };
   }
+  await scanAndModerateRecentSTLHistory(sock).catch(() => {});
   return syncHistoricalMessages(sock);
 }
 
@@ -55,10 +56,12 @@ export async function startWhatsAppService() {
           const jid = msg.key?.remoteJid;
           const groupName = getGroupName(jid);
 
-          // 1. Moderação instantânea de grupos de STL (executa imediatamente em milissegundos)
-          handleGroupModeration(sock, msg, groupName).catch((err) => {
-            console.warn('[Moderação STL Warning]:', err.message);
-          });
+          // 1. Moderação instantânea de grupos de STL (sequencial e segura)
+          if (isSTLOnlyGroup(jid, groupName)) {
+            await handleGroupModeration(sock, msg, groupName).catch((err) => {
+              console.warn('[Moderação STL Warning]:', err.message);
+            });
+          }
 
           // 2. Processamento e download de arquivos 3D (executa em background sem travar a fila de novas mensagens)
           processMessageForSTL(sock, msg, groupName).catch((err) => {
@@ -70,7 +73,29 @@ export async function startWhatsAppService() {
       }
     });
 
-    // 2. Monitoramento de histórico sincronizado (Anexos antigos carregados do WhatsApp)
+    // 2. Monitoramento de resolução assíncrona de chaves / mensagens descriptografadas
+    sock.ev.on('messages.update', async (updates) => {
+      for (const u of updates) {
+        try {
+          const jid = u.key?.remoteJid;
+          if (!jid || !jid.endsWith('@g.us')) continue;
+          const groupName = getGroupName(jid);
+          if (!isSTLOnlyGroup(jid, groupName)) continue;
+
+          if (u.update?.message) {
+            await handleGroupModeration(sock, {
+              key: u.key,
+              message: u.update.message,
+              messageTimestamp: u.update.messageTimestamp || Math.floor(Date.now() / 1000)
+            }, groupName);
+          }
+        } catch (err) {
+          console.warn('[Moderação STL Update Warning]:', err.message);
+        }
+      }
+    });
+
+    // 3. Monitoramento de histórico sincronizado (Moderação retroativa e download de modelos antigos)
     sock.ev.on('messaging-history.set', async ({ messages, syncType }) => {
       if (Array.isArray(messages) && messages.length > 0) {
         console.log(`[WhatsApp Histórico] Bloco recebido (${syncType || 'sync'}): ${messages.length} mensagens`);
@@ -78,6 +103,13 @@ export async function startWhatsAppService() {
           try {
             const jid = msg.key?.remoteJid;
             const groupName = getGroupName(jid);
+
+            // Modera mensagens não-autorizadas captadas no histórico (< 24h)
+            if (isSTLOnlyGroup(jid, groupName)) {
+              await handleGroupModeration(sock, msg, groupName);
+            }
+
+            // Baixa arquivos 3D legítimos
             await processMessageForSTL(sock, msg, groupName);
           } catch (err) {
             // Ignora para não interromper lote
@@ -117,9 +149,10 @@ export async function startWhatsAppService() {
         userJid = sock.user?.id || 'Conectado';
         console.log('✅ [WhatsApp] Conectado com sucesso como:', userJid);
 
-        // Dispara uma sincronização inicial de histórico dos grupos alvo
+        // Dispara uma sincronização inicial de histórico e varredura de moderação dos grupos alvo
         setTimeout(() => {
           syncHistoricalMessages(sock).catch(() => {});
+          scanAndModerateRecentSTLHistory(sock).catch(() => {});
         }, 5000);
       }
     });
