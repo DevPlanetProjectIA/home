@@ -53,7 +53,7 @@ const req = https.request(options, (res) => {
         console.log(`User ID: ${data.user_id}`);
         console.log(`Expira em: ${data.expires_in} segundos`);
 
-        // Salva o token no .env
+        // Salva o token e refresh_token no .env
         const envPath = path.join(__dirname, '..', '.env');
         let envContent = fs.existsSync(envPath) ? fs.readFileSync(envPath, 'utf8') : '';
         if (envContent.includes('ML_ACCESS_TOKEN=')) {
@@ -61,8 +61,15 @@ const req = https.request(options, (res) => {
         } else {
           envContent += `\nML_ACCESS_TOKEN=${data.access_token}\n`;
         }
+        if (data.refresh_token) {
+          if (envContent.includes('ML_REFRESH_TOKEN=')) {
+            envContent = envContent.replace(/ML_REFRESH_TOKEN=.*/, `ML_REFRESH_TOKEN=${data.refresh_token}`);
+          } else {
+            envContent += `\nML_REFRESH_TOKEN=${data.refresh_token}\n`;
+          }
+        }
         fs.writeFileSync(envPath, envContent, 'utf8');
-        console.log('💾 Token salvo no arquivo .env!\n');
+        console.log('💾 Tokens (Access e Refresh) salvos no arquivo .env!\n');
 
         // Executa automaticamente a publicação dos anúncios
         console.log('🚀 Publicando os anúncios agora...');

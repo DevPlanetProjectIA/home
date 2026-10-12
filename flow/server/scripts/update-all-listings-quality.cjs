@@ -27,10 +27,10 @@ const LISTINGS = [
     id: 'MLB5366400871',
     name: 'Microsoft 365 Premium 12 Meses',
     pictures: [
-      { source: `${BASE_IMG_URL}/prod-ms365-1.jpg` },
-      { source: `${BASE_IMG_URL}/prod-ms365-2.jpg` },
-      { source: `${BASE_IMG_URL}/prod-ms365-3.jpg` },
-      { source: `${BASE_IMG_URL}/prod-ms365-4.jpg` }
+      { source: `${BASE_IMG_URL}/prod-ms365-1.jpg?v=3d` },
+      { source: `${BASE_IMG_URL}/prod-ms365-2.jpg?v=3d` },
+      { source: `${BASE_IMG_URL}/prod-ms365-3.jpg?v=3d` },
+      { source: `${BASE_IMG_URL}/prod-ms365-4.jpg?v=3d` }
     ],
     attributes: [
       { id: 'BRAND', value_name: 'Microsoft' },
@@ -59,10 +59,10 @@ const LISTINGS = [
     id: 'MLB5366440323',
     name: 'Google AI Pro 18 Meses (5 TB Nuvem)',
     pictures: [
-      { source: `${BASE_IMG_URL}/prod-googleai-1.jpg` },
-      { source: `${BASE_IMG_URL}/prod-googleai-2.jpg` },
-      { source: `${BASE_IMG_URL}/prod-googleai-3.jpg` },
-      { source: `${BASE_IMG_URL}/prod-googleai-4.jpg` }
+      { source: `${BASE_IMG_URL}/prod-googleai-1.jpg?v=3d` },
+      { source: `${BASE_IMG_URL}/prod-googleai-2.jpg?v=3d` },
+      { source: `${BASE_IMG_URL}/prod-googleai-3.jpg?v=3d` },
+      { source: `${BASE_IMG_URL}/prod-googleai-4.jpg?v=3d` }
     ],
     attributes: [
       { id: 'BRAND', value_name: 'Google' },
@@ -92,10 +92,10 @@ const LISTINGS = [
     id: 'MLB5366401673',
     name: 'Lovable Lite 12 Meses (IA Fullstack)',
     pictures: [
-      { source: `${BASE_IMG_URL}/prod-lovable-1.jpg` },
-      { source: `${BASE_IMG_URL}/prod-lovable-2.jpg` },
-      { source: `${BASE_IMG_URL}/prod-lovable-3.jpg` },
-      { source: `${BASE_IMG_URL}/prod-lovable-4.jpg` }
+      { source: `${BASE_IMG_URL}/prod-lovable-1.jpg?v=3d` },
+      { source: `${BASE_IMG_URL}/prod-lovable-2.jpg?v=3d` },
+      { source: `${BASE_IMG_URL}/prod-lovable-3.jpg?v=3d` },
+      { source: `${BASE_IMG_URL}/prod-lovable-4.jpg?v=3d` }
     ],
     attributes: [
       { id: 'DEVELOPER', value_name: 'Lovable' },
@@ -121,10 +121,10 @@ const LISTINGS = [
     id: 'MLB7784965030',
     name: 'Express Criativo Premium 12 Meses',
     pictures: [
-      { source: `${BASE_IMG_URL}/prod-express-1.jpg` },
-      { source: `${BASE_IMG_URL}/prod-express-2.jpg` },
-      { source: `${BASE_IMG_URL}/prod-express-3.jpg` },
-      { source: `${BASE_IMG_URL}/prod-express-4.jpg` }
+      { source: `${BASE_IMG_URL}/prod-express-1.jpg?v=3d` },
+      { source: `${BASE_IMG_URL}/prod-express-2.jpg?v=3d` },
+      { source: `${BASE_IMG_URL}/prod-express-3.jpg?v=3d` },
+      { source: `${BASE_IMG_URL}/prod-express-4.jpg?v=3d` }
     ],
     attributes: [
       { id: 'BRAND', value_name: 'Express' },
@@ -152,10 +152,10 @@ const LISTINGS = [
     id: 'MLB5366439113',
     name: 'Amazon Prime Video 6 Meses 4K',
     pictures: [
-      { source: `${BASE_IMG_URL}/prod-prime-1.jpg` },
-      { source: `${BASE_IMG_URL}/prod-prime-2.jpg` },
-      { source: `${BASE_IMG_URL}/prod-prime-3.jpg` },
-      { source: `${BASE_IMG_URL}/prod-prime-4.jpg` }
+      { source: `${BASE_IMG_URL}/prod-prime-1.jpg?v=3d` },
+      { source: `${BASE_IMG_URL}/prod-prime-2.jpg?v=3d` },
+      { source: `${BASE_IMG_URL}/prod-prime-3.jpg?v=3d` },
+      { source: `${BASE_IMG_URL}/prod-prime-4.jpg?v=3d` }
     ],
     attributes: [
       { id: 'BRAND', value_name: 'Amazon' },
@@ -182,10 +182,10 @@ const LISTINGS = [
     id: 'MLB5366512415',
     name: 'Duolingo Super 12 Meses (Vidas Infinitas)',
     pictures: [
-      { source: `${BASE_IMG_URL}/prod-duolingo-1.jpg` },
-      { source: `${BASE_IMG_URL}/prod-duolingo-2.jpg` },
-      { source: `${BASE_IMG_URL}/prod-duolingo-3.jpg` },
-      { source: `${BASE_IMG_URL}/prod-duolingo-4.jpg` }
+      { source: `${BASE_IMG_URL}/prod-duolingo-1.jpg?v=3d` },
+      { source: `${BASE_IMG_URL}/prod-duolingo-2.jpg?v=3d` },
+      { source: `${BASE_IMG_URL}/prod-duolingo-3.jpg?v=3d` },
+      { source: `${BASE_IMG_URL}/prod-duolingo-4.jpg?v=3d` }
     ],
     attributes: [
       { id: 'BRAND', value_name: 'Duolingo' },

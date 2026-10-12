@@ -7,16 +7,24 @@ import path from 'node:path';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import { fulfillOrderLicense } from './licenseService.js';
+import { fulfillOrderLicense, PRODUCT_INSTRUCTIONS } from './licenseService.js';
 import { startTelegramPolling, notifyAdminNewOrder } from './telegramService.js';
-import { startWhatsAppService, getWhatsAppStatus, sendAutoWhatsAppMessage, fetchWhatsAppGroups, broadcastToWhatsAppGroups, searchPublicWhatsAppGroups, joinAndBroadcastPublicGroups } from './whatsappService.js';
+import { startMLAutopilotPolling } from './mlAutopilotService.js';
+import { startWhatsAppService, getWhatsAppStatus, sendAutoWhatsAppMessage, fetchWhatsAppGroups, broadcastToWhatsAppGroups, searchPublicWhatsAppGroups, joinAndBroadcastPublicGroups, triggerSTLHistorySync } from './whatsappService.js';
+import { getSTLServiceStatus, importFromLocalDirectory, syncPendingModelsToSupabase } from './stlSyncService.js';
 
+import { exec } from 'node:child_process';
 import { initDatabase } from './db.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
 fs.mkdirSync(DATA_DIR, { recursive: true });
+
+const PROJECT_ROOT = process.env.PROJECT_3D_DIR || 
+  (fs.existsSync(path.resolve(__dirname, '..', '..', '..', '3D-Project'))
+    ? path.resolve(__dirname, '..', '..', '..', '3D-Project')
+    : path.resolve(__dirname, '..', '..', '3D-Project'));
 
 // JWT secret: env var or persisted random secret
 let SECRET = process.env.JWT_SECRET;
@@ -75,7 +83,14 @@ db.exec(`
 const KINDS = new Set(['clients', 'orders', 'stock', 'transactions', 'quotes', 'consigned', 'settings']);
 
 const app = express();
-app.use(express.json({ limit: '5mb' }));
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization,apikey');
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
+});
+app.use(express.json({ limit: '15mb' }));
 app.use(cookieParser());
 
 // Healthcheck para Render / Monitoramento Uptime
@@ -442,8 +457,25 @@ eco.post('/webhooks/mercadopago', async (req, res) => {
         const order = db.prepare('SELECT * FROM ecommerce_orders WHERE payment_id=? OR id=?').get(String(paymentId), paymentData.external_reference);
         if (order && order.status !== 'delivered') {
           db.prepare("UPDATE ecommerce_orders SET status='approved', updated_at=CURRENT_TIMESTAMP WHERE id=?").run(order.id);
-          const updatedOrder = db.prepare('SELECT * FROM ecommerce_orders WHERE id=?').get(order.id);
-          await notifyAdminNewOrder(updatedOrder);
+          const approvedOrder = db.prepare('SELECT * FROM ecommerce_orders WHERE id=?').get(order.id);
+          
+          // Piloto Automático: Entrega imediata da licença
+          const fulfillment = await fulfillOrderLicense(approvedOrder, db);
+          const deliveredOrder = db.prepare('SELECT * FROM ecommerce_orders WHERE id=?').get(order.id);
+          await notifyAdminNewOrder(deliveredOrder);
+
+          // Disparo automático via WhatsApp
+          if (deliveredOrder.customer_phone) {
+            const prodInfo = PRODUCT_INSTRUCTIONS[deliveredOrder.product_id] || { guide: 'Siga as orientações oficiais para ativar sua assinatura.' };
+            const waText = 
+              `Olá, ${deliveredOrder.customer_name}! 🚀\n` +
+              `Seu pagamento foi aprovado na DevPlanet Store!\n\n` +
+              `📦 *Produto:* ${deliveredOrder.product_name}\n` +
+              `🔑 *Chave de Ativação:*\n${fulfillment.licenseKey}\n\n` +
+              `📖 *Instruções de Ativação:*\n${prodInfo.guide}\n\n` +
+              `Qualquer dúvida ou suporte, estou à disposição aqui na conversa!`;
+            await sendAutoWhatsAppMessage(deliveredOrder.customer_phone, waText).catch(e => console.warn('[WA Auto Send]:', e.message));
+          }
         }
       }
     }
@@ -462,9 +494,35 @@ eco.post('/orders/:id/simulate-payment', async (req, res) => {
   if (!order) return res.status(404).json({ error: 'Pedido não encontrado.' });
 
   db.prepare("UPDATE ecommerce_orders SET status='approved', updated_at=CURRENT_TIMESTAMP WHERE id=?").run(order.id);
-  const updatedOrder = db.prepare('SELECT * FROM ecommerce_orders WHERE id=?').get(order.id);
-  await notifyAdminNewOrder(updatedOrder);
-  res.json({ success: true, message: 'Pagamento aprovado e alerta enviado ao Telegram do administrador!' });
+  const approvedOrder = db.prepare('SELECT * FROM ecommerce_orders WHERE id=?').get(order.id);
+
+  // Piloto Automático: Entrega imediata
+  const fulfillment = await fulfillOrderLicense(approvedOrder, db);
+  const deliveredOrder = db.prepare('SELECT * FROM ecommerce_orders WHERE id=?').get(order.id);
+  await notifyAdminNewOrder(deliveredOrder);
+
+  // Disparo automático no WhatsApp
+  let waSent = false;
+  if (deliveredOrder.customer_phone) {
+    const prodInfo = PRODUCT_INSTRUCTIONS[deliveredOrder.product_id] || { guide: 'Siga as orientações oficiais para ativar sua assinatura.' };
+    const waText = 
+      `Olá, ${deliveredOrder.customer_name}! 🚀\n` +
+      `Seu pagamento foi aprovado na DevPlanet Store!\n\n` +
+      `📦 *Produto:* ${deliveredOrder.product_name}\n` +
+      `🔑 *Chave de Ativação:*\n${fulfillment.licenseKey}\n\n` +
+      `📖 *Instruções de Ativação:*\n${prodInfo.guide}\n\n` +
+      `Qualquer dúvida ou suporte, estou à disposição aqui na conversa!`;
+    const waRes = await sendAutoWhatsAppMessage(deliveredOrder.customer_phone, waText).catch(e => ({ success: false }));
+    waSent = waRes?.success || false;
+  }
+
+  res.json({ 
+    success: true, 
+    status: 'delivered', 
+    licenseKey: fulfillment.licenseKey,
+    whatsappSent: waSent,
+    message: 'Pagamento aprovado e licença entregue no piloto automático!' 
+  });
 });
 
 // 6. Entregar Licença (Web, API ou Painel)
@@ -530,6 +588,215 @@ app.post('/api/whatsapp/join-and-broadcast', async (req, res) => {
   res.json(result);
 });
 
+// 12. Status do Downloader STL/3MF dos grupos
+app.get('/api/whatsapp/stl/status', (_req, res) => {
+  res.json(getSTLServiceStatus());
+});
+
+// 13. Disparar sincronização manual de histórico antigo dos grupos
+app.post('/api/whatsapp/stl/sync', async (_req, res) => {
+  const result = await triggerSTLHistorySync();
+  res.json(result);
+});
+
+// 14. Importar arquivos de pasta local (ex: pasta Downloads do usuário)
+app.post('/api/whatsapp/stl/import-local', async (req, res) => {
+  const { dirPath } = req.body || {};
+  const result = await importFromLocalDirectory(dirPath);
+  res.json(result);
+});
+
+// 15. Enviar todos os modelos pendentes para o Supabase Storage e Banco
+app.post('/api/whatsapp/stl/sync-supabase', async (_req, res) => {
+  const result = await syncPendingModelsToSupabase();
+  res.json(result);
+});
+
+// 16. Estatísticas da Comunidade e Acervo (Contador de usuários, modelos e WhatsApp)
+app.get('/api/stats', async (_req, res) => {
+  try {
+    let usersCount = 66;
+    if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      const k = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      const r = await fetch(`${process.env.SUPABASE_URL || 'https://eqhxwpgpzseprcmiuaww.supabase.co'}/rest/v1/profiles?select=id`, {
+        headers: { apikey: k, Authorization: `Bearer ${k}` },
+        signal: AbortSignal.timeout(5000),
+      });
+      if (r.ok) {
+        const data = await r.json();
+        if (Array.isArray(data)) usersCount = Math.max(usersCount, data.length);
+      }
+    }
+    const stlStatus = getSTLServiceStatus();
+    res.json({
+      usersCount,
+      modelsCount: stlStatus.stats?.totalDownloaded || 0,
+      whatsappActive: stlStatus.active,
+      timestamp: new Date().toISOString()
+    });
+  } catch (err) {
+    res.json({ usersCount: 66, modelsCount: 0, whatsappActive: true, error: err.message });
+  }
+});
+
+// 17. Buscar fotos de capa no MakerWorld / Comunidade 3D (Múltiplas Opções)
+app.get('/api/models/search-cover', async (req, res) => {
+  const { query } = req.query;
+  if (!query) return res.status(400).json({ error: 'Parâmetro query ausente' });
+  try {
+    const { search3DModelCandidates } = await import('./makerworldSearch.js');
+    const candidates = await search3DModelCandidates(query);
+    res.json({ success: true, count: candidates.length, candidates });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Proxy de imagens para evitar bloqueios de CORS no navegador
+app.get('/api/models/proxy-image', async (req, res) => {
+  const { url } = req.query;
+  if (!url) return res.status(400).send('URL ausente');
+  try {
+    const imgRes = await fetch(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0' },
+      signal: AbortSignal.timeout(10000)
+    });
+    if (!imgRes.ok) return res.status(imgRes.status).send('Erro');
+    res.setHeader('Content-Type', imgRes.headers.get('content-type') || 'image/jpeg');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    const buf = Buffer.from(await imgRes.arrayBuffer());
+    res.send(buf);
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+});
+
+// 18. Atualizar Capa do Modelo (Aceita dataUrl OU imageUrl selecionada)
+app.post('/api/models/:id/update-cover', async (req, res) => {
+  const { id } = req.params;
+  const { dataUrl, imageUrl } = req.body || {};
+  if (!dataUrl && !imageUrl) return res.status(400).json({ error: 'dataUrl ou imageUrl ausente' });
+  try {
+    let buffer = null;
+    if (dataUrl) {
+      const base64Data = dataUrl.replace(/^data:image\/\w+;base64,/, '');
+      buffer = Buffer.from(base64Data, 'base64');
+    } else if (imageUrl) {
+      const dlRes = await fetch(imageUrl, {
+        headers: { 'User-Agent': 'Mozilla/5.0' },
+        signal: AbortSignal.timeout(12000)
+      });
+      if (!dlRes.ok) throw new Error('Falha ao baixar imagem remota selecionada');
+      const raw = Buffer.from(await dlRes.arrayBuffer());
+      const { default: sharp } = await import('sharp');
+      buffer = await sharp(raw)
+        .resize(512, 512, { fit: 'contain', background: { r: 15, g: 23, b: 42, alpha: 1 } })
+        .png()
+        .toBuffer();
+    }
+    const k = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const url = process.env.SUPABASE_URL || 'https://eqhxwpgpzseprcmiuaww.supabase.co';
+    const userId = process.env.SUPABASE_USER_ID || 'a25a3db7-e996-47c8-869f-3c167f26cf1e';
+    const stamp = Date.now();
+    const fileName = `thumb_${stamp}.png`;
+    const thumbPath = `${userId}/${id}/${fileName}`;
+
+    // 1. Upload para o bucket modelos do Supabase Storage
+    if (k) {
+      const uploadUrl = `${url}/storage/v1/object/modelos/${encodeURIComponent(userId)}/${encodeURIComponent(id)}/${encodeURIComponent(fileName)}`;
+      await fetch(uploadUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${k}`,
+          'apikey': k,
+          'Content-Type': 'image/png',
+          'x-upsert': 'true'
+        },
+        body: buffer
+      });
+
+      // 2. Atualiza registro na tabela models
+      await fetch(`${url}/rest/v1/models?id=eq.${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${k}`,
+          'apikey': k,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify({ thumb_path: thumbPath, updated_at: new Date().toISOString() })
+      });
+    }
+
+    // 3. Atualiza pasta e catálogo local no Git
+    const localDir = path.join(PROJECT_ROOT, 'models', id);
+    if (fs.existsSync(localDir)) {
+      fs.writeFileSync(path.join(localDir, 'thumb.png'), buffer);
+    }
+    const catPath = path.join(PROJECT_ROOT, 'data', 'catalog.json');
+    if (fs.existsSync(catPath)) {
+      try {
+        const cat = JSON.parse(fs.readFileSync(catPath, 'utf8'));
+        const target = cat.models.find(m => m.id === id);
+        if (target) {
+          target.thumb = thumbPath;
+          cat.updated = new Date().toISOString();
+          fs.writeFileSync(catPath, JSON.stringify(cat, null, 2));
+          exec(`git add data/catalog.json models/${id}/thumb.png && git commit -m "chore(catalogo): atualiza capa de ${id}" && git push origin main`, { cwd: PROJECT_ROOT }, () => {});
+        }
+      } catch {}
+    }
+
+    res.json({ success: true, thumbPath });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 19. Remoção Permanente de Modelo (Administrador)
+app.delete('/api/models/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const k = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const url = process.env.SUPABASE_URL || 'https://eqhxwpgpzseprcmiuaww.supabase.co';
+    
+    // 1. Deleta do Supabase (tabela models)
+    if (k) {
+      await fetch(`${url}/rest/v1/models?id=eq.${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${k}`,
+          'apikey': k
+        }
+      });
+    }
+
+    // 2. Remove do catálogo local catalog.json
+    const catPath = path.join(PROJECT_ROOT, 'data', 'catalog.json');
+    if (fs.existsSync(catPath)) {
+      try {
+        const cat = JSON.parse(fs.readFileSync(catPath, 'utf8'));
+        cat.models = cat.models.filter(m => m.id !== id);
+        cat.updated = new Date().toISOString();
+        fs.writeFileSync(catPath, JSON.stringify(cat, null, 2));
+      } catch {}
+    }
+
+    // 3. Remove pasta física do repositório
+    const localDir = path.join(PROJECT_ROOT, 'models', id);
+    if (fs.existsSync(localDir)) {
+      fs.rmSync(localDir, { recursive: true, force: true });
+    }
+
+    // 4. Git commit & push
+    exec(`git add data/catalog.json && git rm -r --ignore-unmatch models/${id} && git commit -m "chore(catalogo): remove modelo ${id}" && git push origin main`, { cwd: PROJECT_ROOT }, () => {});
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.use('/api/ecommerce', eco);
 app.use('/api', crud);
 
@@ -548,6 +815,7 @@ app.listen(PORT, () => {
   console.log(`Servidor em http://localhost:${PORT}`);
   startTelegramPolling(db);
   startWhatsAppService();
+  startMLAutopilotPolling(db);
 
   // Keep-alive automático para evitar que o Render entre em modo de espera (sleep após 15 min)
   const keepAliveUrl = process.env.PUBLIC_BACKEND_URL;

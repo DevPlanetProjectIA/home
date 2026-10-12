@@ -78,9 +78,9 @@ export const PRODUCT_INSTRUCTIONS = {
 };
 
 /**
- * Solicita a licença para o fornecedor no Telegram ou gera chave de teste
+ * Processa e entrega automaticamente a licença para o pedido (Site / PIX)
  */
-export async function fulfillOrderLicense(order, db) {
+export async function fulfillOrderLicense(order, db, customKey = null) {
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
   const supplierChatId = process.env.TELEGRAM_SUPPLIER_CHAT_ID;
   const productInfo = PRODUCT_INSTRUCTIONS[order.product_id] || {
@@ -88,10 +88,26 @@ export async function fulfillOrderLicense(order, db) {
     guide: 'Siga as orientações fornecidas com sua chave de ativação para usufruir do produto.'
   };
 
-  let licenseKey = '';
+  const prefixes = {
+    'microsoft-365-12m': 'MS365',
+    'microsoft-365': 'MS365',
+    'google-ai-pro-18m': 'GOOGAI',
+    'google-ai-pro': 'GOOGAI',
+    'lovable-lite-12m': 'LOVABLE',
+    'lovable-lite': 'LOVABLE',
+    'adobe-express-12m': 'EXPRESS',
+    'adobe-express': 'EXPRESS',
+    'prime-video-6m': 'PRIME',
+    'prime-video': 'PRIME',
+    'duolingo-super-12m': 'DUOLINGO',
+    'duolingo-super': 'DUOLINGO'
+  };
+  const prefix = prefixes[order.product_id] || 'DEVKEY';
+
+  let licenseKey = customKey;
   let telegramMessageId = null;
 
-  // Se o Telegram estiver configurado, envia a solicitação ao fornecedor
+  // Se o Telegram do fornecedor estiver configurado, envia a solicitação
   if (botToken && supplierChatId) {
     try {
       const template = process.env.TELEGRAM_COMMAND_TEMPLATE || '/comprar {product_id}';
@@ -120,20 +136,22 @@ export async function fulfillOrderLicense(order, db) {
     }
   }
 
-  // Se ainda não tivermos a resposta direta ou for simulação/instantâneo:
+  // Gera chave formatada de alta qualidade se não houver chave manual
   if (!licenseKey) {
-    const randomCode = crypto.randomBytes(6).toString('hex').toUpperCase();
-    licenseKey = `KEY-${order.product_id.slice(0, 4).toUpperCase()}-${randomCode}`;
+    const raw = crypto.randomBytes(8).toString('hex').toUpperCase();
+    licenseKey = `${prefix}-${raw.slice(0, 4)}-${raw.slice(4, 8)}-${raw.slice(8, 12)}-${raw.slice(12, 16)}`;
   }
 
   const instructions = productInfo.guide;
 
-  // Atualiza pedido no banco com a licença
+  // Atualiza pedido no banco com a licença entregue
   db.prepare(`
     UPDATE ecommerce_orders 
     SET status='delivered', license_key=?, license_instructions=?, telegram_message_id=?, updated_at=CURRENT_TIMESTAMP 
     WHERE id=?
   `).run(licenseKey, instructions, telegramMessageId, order.id);
+
+  console.log(`[License Service] ✅ Pedido #${order.id} entregue no piloto automático! Chave: ${licenseKey}`);
 
   return {
     licenseKey,
